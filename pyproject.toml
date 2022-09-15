@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "metrics"
+version = "0.1.0"
+description = ""
+authors = ["Szymon Idziniak <szymon.idziniak@stxnext.pl>"]
+
+# TODO: add torch into poetry dependencies,
+# so it will be easier to build container just with requirements.txt dump from poetry
+[tool.poetry.dependencies]
+python = "3.8.10"
+scipy = "^1.9.0"
+tensorboard = "^2.9.1"
+umap-learn = "^0.5.3"
+matplotlib = "^3.5.2"
+Pillow = "^9.2.0"
+scikit-learn = "^1.1.2"
+timm = "^0.6.7"
+qdrant-client = "^0.9.7"
+autoflake = "^1.5.3"
+uvicorn = {extras = ["standard"], version = "^0.18.3"}
+fastapi = {extras = ["uvicorn"], version = "^0.81.0"}
+pytorch-metric-learning = "^1.5.2"
+pandas = "^1.4.4"
+python-multipart = "^0.0.5"
+Jinja2 = "^3.1.2"
+fastapi-utils = "^0.2.1"
+record-keeper = "^0.9.32"
+
+[tool.poetry.dev-dependencies]
+black = "^22.8.0"
+isort = "^5.10.1"
+mypy = "^0.971"
+notebook = "^6.4.12"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+# TODO: add exclude folders for python tools
+[tool.black]
+# https://github.com/psf/black
+line-length = 88
+target_version = ['py38']
+exclude = '''
+(
+  /(
+    \.git
+    | \.pytest_cache
+    | venv
+    | .venv
+    | migrations
+  )/
+)
+'''
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+line_length = 88
+skip_glob = ["/data/*"]

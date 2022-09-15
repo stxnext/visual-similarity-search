@@ -1,0 +1,22 @@
+  version: '3.7'
+
+  services:
+    qdrant:
+      image: qdrant/qdrant:latest
+      ports:
+      - 6333:6333
+      volumes:
+        - ./data/qdrant_storage:/qdrant/storage
+    web-api:
+      build:
+        context: ./
+        dockerfile: Dockerfile
+      container_name: web-api
+      ports:
+        - 8000:8000
+      labels:
+        application: 'web-api'
+      stdin_open: true
+      tty: true
+      depends_on:
+        - "qdrant"
