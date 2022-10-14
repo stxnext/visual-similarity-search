@@ -118,3 +118,18 @@ class MetricClient:
         grid = make_grid(imgs)
         grid_img = torchvision.transforms.ToPILImage()(grid)
         return img, grid_img
+
+    def _get_best_choice_for_uploaded_image(
+        self, file: bytes, collection_name: str, k: int = 25
+    ) -> Tuple[Image.Image, Image.Image]:
+        """
+        Search for similar images of random image from given collection.
+        Returns tuple of images [anchor_image, grid image of k most similar images (the biggest cosine similarity)
+        # TODO: probably going to be removed as it is only helper method
+        """
+        img = Image.open(file)
+        results = self.search(img, collection_name, limit=k)
+        imgs = [RESIZE_TRANSFORM(Image.open(r.payload["file"])) for r in results]
+        grid = make_grid(imgs)
+        grid_img = torchvision.transforms.ToPILImage()(grid)
+        return img, grid_img
