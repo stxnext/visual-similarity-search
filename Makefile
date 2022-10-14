@@ -22,6 +22,6 @@ run-docker:
 	docker-compose -f docker-compose.yaml up
 
 run-local:
-	poetry run uvicorn app.main:app --proxy-headers --host 0.0.0.0 --port 8000
+	poetry run uvicorn api.main:app --proxy-headers --host 0.0.0.0 --port 8000
 
 run-clean: generate-req run-docker

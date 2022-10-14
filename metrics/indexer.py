@@ -6,6 +6,7 @@ import torch
 from loguru import logger
 from PIL import Image
 from qdrant_client.conversions.common_types import Distance
+from qdrant_client.http import models
 from tqdm.auto import tqdm
 
 from metrics import qdrant_client
@@ -31,7 +32,8 @@ def create_collection(
 ):
     """Wrapper function for auto injecting qdrant client object and creating collection"""
     qdrant_client.recreate_collection(
-        collection_name=collection_name, vector_size=vector_size, distance=distance
+        collection_name=collection_name,
+        vectors_config=models.VectorParams(size=vector_size, distance=distance)
     )
 
 
@@ -55,7 +57,10 @@ def upload_indexes(
     for i, row in tqdm(df.iterrows(), total=df.shape[0]):
         img = INFER_TRANSFORM(Image.open(row["file"]).convert("RGB"))
         with torch.no_grad():
-            embedding = model(img.cuda().unsqueeze(0))[0, :]
+            if torch.cuda.is_available():
+                embedding = model(img.cuda().unsqueeze(0))[0, :]
+            else:
+                embedding = model(img.unsqueeze(0))[0, :]
         embeddings.append(embedding.cpu().data.numpy())
         meta_data.append(dict(row))
     embeddings = np.array(embeddings)

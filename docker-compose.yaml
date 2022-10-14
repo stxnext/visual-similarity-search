@@ -2,7 +2,7 @@
 
   services:
     qdrant:
-      image: qdrant/qdrant:latest
+      image: qdrant/qdrant:v0.10.3
       ports:
       - 6333:6333
       volumes:

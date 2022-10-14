@@ -15,7 +15,7 @@ matplotlib = "^3.5.2"
 Pillow = "^9.2.0"
 scikit-learn = "^1.1.2"
 timm = "^0.6.7"
-qdrant-client = "^0.9.7"
+qdrant-client = "^0.10"
 autoflake = "^1.5.3"
 uvicorn = {extras = ["standard"], version = "^0.18.3"}
 fastapi = {extras = ["uvicorn"], version = "^0.81.0"}
@@ -25,6 +25,7 @@ python-multipart = "^0.0.5"
 Jinja2 = "^3.1.2"
 fastapi-utils = "^0.2.1"
 record-keeper = "^0.9.32"
+loguru = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"

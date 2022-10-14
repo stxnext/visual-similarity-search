@@ -2,7 +2,7 @@ import json
 from typing import Dict, List, Optional, Tuple, Union
 
 import torch
-from consts import METRIC_COLLECTION_NAMES
+from metrics.consts import METRIC_COLLECTION_NAMES
 from pytorch_metric_learning.utils.common_functions import Identity
 from torch import Tensor, nn
 from torchvision import models as pretrained_models
@@ -79,8 +79,8 @@ def get_trunk_embedder(
     trunk, trunk_output_size = get_trunk(trunk_model_name)
     embedder = EmbeddingNN([trunk_output_size] + layer_sizes).to(DEVICE)
     if weights:
-        trunk.load_state_dict(torch.load(weights["trunk"]))
-        embedder.load_state_dict(torch.load(weights["embedder"]))
+        trunk.load_state_dict(torch.load(weights["trunk"], map_location=DEVICE))
+        embedder.load_state_dict(torch.load(weights["embedder"], map_location=DEVICE))
     if data_parallel:
         trunk = nn.DataParallel(trunk)
         embedder = nn.DataParallel(embedder)

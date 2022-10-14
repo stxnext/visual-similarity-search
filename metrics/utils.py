@@ -69,7 +69,7 @@ class DatasetCombined:
             frac=1
         )  # shuffle dataframe just in case, because split is not class balanced (not guaranteed)
         # add data_dir path to meta file, so filenames will contain absolute path for data
-        df["file"] = df["file"].apply(lambda file: str((data_dir / file).absolute()))
+        df["file"] = df["file"].apply(lambda file: f"{data_dir}/{file}")
         x_train, x_test, y_train, y_test = train_test_split(
             np.array(df["file"]), np.array(df["label"]), train_size=split
         )
