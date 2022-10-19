@@ -19,7 +19,7 @@ RUN pip install -r /$APP_NAME/requirements.txt
 
 ENV PATH /root/.local/bin:$PATH
 COPY /api /$APP_NAME/api
-COPY /data/models /$APP_NAME/data/models
+COPY /data/models /$APP_NAME/data/modelspdati
 COPY /data/metric_datasets/dogs /$APP_NAME/data/metric_datasets/dogs
 COPY /interactive /$APP_NAME/interactive
 COPY /metrics /$APP_NAME/metrics
