@@ -3,19 +3,24 @@
   services:
     qdrant:
       image: qdrant/qdrant:v0.10.3
+      container_name: qdrant
       ports:
       - 6333:6333
+      env_file:
+        - .env
       volumes:
         - ./data/qdrant_storage:/qdrant/storage
-    web-api:
+    interactive:
       build:
         context: ./
-        dockerfile: Dockerfile
-      container_name: web-api
+        dockerfile: Dockerfile-interactive
+      container_name: interactive
       ports:
-        - 8000:8000
+        - 8080:8080
+      env_file:
+        - .env
       labels:
-        application: 'web-api'
+        application: 'interactive'
       stdin_open: true
       tty: true
       depends_on:

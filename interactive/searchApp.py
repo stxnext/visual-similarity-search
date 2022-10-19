@@ -8,6 +8,9 @@ sys.path.append(modules_path)
 
 from metrics.core import MetricClient
 
+st.write(""" #### Initializing models """)
+
+client = MetricClient()
 
 st.write(""" ## Closest similarity images for anchor image """)
 st.write(""" #### Select inputs """)
@@ -25,14 +28,13 @@ similar_img_number = st.number_input(
 uploaded_file = st.file_uploader("Choose a file.")
 
 if category_option and similar_img_number and uploaded_file:
-    client = MetricClient()
 
-    def search_with_show(collection: str, k: int, file=uploaded_file):
-        anchor, similars = client._get_best_choice_for_uploaded_image(uploaded_file, collection, k=k)
+    def search_with_show(collection: str, k: int, file):
+        anchor, similars = client._get_best_choice_for_uploaded_image(file, collection, k=k)
 
         st.write(""" Anchor Image """)
         st.image(anchor)
         st.write(""" Similar Images """)
         st.image(similars)
 
-    search_with_show(category_option, similar_img_number)
+    search_with_show(file=uploaded_file, collection=category_option, k=similar_img_number)
