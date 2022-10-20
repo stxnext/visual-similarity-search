@@ -5,11 +5,11 @@ import numpy as np
 import torch
 from loguru import logger
 from PIL import Image
+from qdrant_client import QdrantClient
 from qdrant_client.conversions.common_types import Distance
 from qdrant_client.http import models
 from tqdm.auto import tqdm
 
-from metrics import qdrant_client
 from metrics.consts import INFER_TRANSFORM
 from metrics.nets import get_full_pretrained_model
 from metrics.utils import DatasetCombined
@@ -28,10 +28,10 @@ def shoes_filter(meta: List[Dict]) -> List[Dict]:
 
 # TODO: check if we need wrapper func for singleton client
 def create_collection(
-    collection_name: str, vector_size: int, distance: Union[Distance, DISTANCES]
+    client: QdrantClient, collection_name: str, vector_size: int, distance: Union[Distance, DISTANCES]
 ):
     """Wrapper function for auto injecting qdrant client object and creating collection"""
-    qdrant_client.recreate_collection(
+    client.recreate_collection(
         collection_name=collection_name,
         vectors_config=models.VectorParams(size=vector_size, distance=distance)
     )
@@ -39,6 +39,7 @@ def create_collection(
 
 # TODO: add support for batch gpu inference to speed up index upload
 def upload_indexes(
+    client: QdrantClient,
     collection_name: str,
     meta_file: Union[Path, str],
     dataset_dir: Union[Path, str],
@@ -53,6 +54,7 @@ def upload_indexes(
     embeddings = []
     meta_data = []
     df = dataset.df
+    df = df.fillna('')  # JSON does not support np.nan and pd.NaN
     logger.info(f"Started indexing {len(df)} vectors for collection {collection_name}")
     for i, row in tqdm(df.iterrows(), total=df.shape[0]):
         img = INFER_TRANSFORM(Image.open(row["file"]).convert("RGB"))
@@ -68,7 +70,7 @@ def upload_indexes(
     if meta_filter:
         meta_data = meta_filter(meta_data)
 
-    qdrant_client.upload_collection(
+    client.upload_collection(
         collection_name=collection_name,
         vectors=embeddings,
         payload=meta_data,

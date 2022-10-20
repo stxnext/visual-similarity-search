@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Dict, List, Optional, Tuple, Union
 
 import torch
@@ -7,7 +8,7 @@ from pytorch_metric_learning.utils.common_functions import Identity
 from torch import Tensor, nn
 from torchvision import models as pretrained_models
 
-from metrics import DEVICE, MODELS_DIR
+from metrics import minio_client, MINIO_BUCKET_NAME, MINIO_MODELS_DIR, DEVICE, MODELS_DIR
 from metrics.utils import rgetattr, rsetattr
 
 MODEL_TYPE = Union[nn.DataParallel, nn.Module]
@@ -79,8 +80,12 @@ def get_trunk_embedder(
     trunk, trunk_output_size = get_trunk(trunk_model_name)
     embedder = EmbeddingNN([trunk_output_size] + layer_sizes).to(DEVICE)
     if weights:
-        trunk.load_state_dict(torch.load(weights["trunk"], map_location=DEVICE))
-        embedder.load_state_dict(torch.load(weights["embedder"], map_location=DEVICE))
+        if not os.path.exists(weights["trunk_local"]):
+            minio_client.fget_object(MINIO_BUCKET_NAME, weights["trunk_minio"], weights["trunk_local"])
+        if not os.path.exists(weights["embedder_local"]):
+            minio_client.fget_object(MINIO_BUCKET_NAME, weights["embedder_minio"], weights["embedder_local"])
+        trunk.load_state_dict(torch.load(weights["trunk_local"], map_location=DEVICE))
+        embedder.load_state_dict(torch.load(weights["embedder_local"], map_location=DEVICE))
     if data_parallel:
         trunk = nn.DataParallel(trunk)
         embedder = nn.DataParallel(embedder)
@@ -93,11 +98,17 @@ def get_full_pretrained_model(
     """Get full pretrained model with loaded weights"""
     if model_name not in METRIC_COLLECTION_NAMES:
         raise UnsupportedModel(model_name)
-    with open(MODELS_DIR / model_name / "meta.json") as f:
-        meta = json.load(f)
+    meta = json.load(
+        minio_client.get_object(
+            bucket_name=MINIO_BUCKET_NAME,
+            object_name=os.path.join(MINIO_MODELS_DIR, model_name, "meta.json")
+        )
+    )
     weights = {
-        "trunk": MODELS_DIR / model_name / "trunk.pth",
-        "embedder": MODELS_DIR / model_name / "embedder.pth",
+        "trunk_minio":  os.path.join(MINIO_MODELS_DIR, model_name, "trunk.pth"),
+        "embedder_minio": os.path.join(MINIO_MODELS_DIR, model_name, "embedder.pth"),
+        "trunk_local":  os.path.join(MODELS_DIR, model_name, "trunk.pth"),
+        "embedder_local": os.path.join(MODELS_DIR, model_name, "embedder.pth"),
     }
     trunk, embedder = get_trunk_embedder(
         meta["trunk"], meta["embedder_layers"], data_parallel=False, weights=weights

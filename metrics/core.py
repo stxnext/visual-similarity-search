@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
+import os
 import torch
 import torchvision
 from loguru import logger
@@ -13,7 +14,14 @@ from torchvision.transforms.transforms import Compose
 from torchvision.utils import make_grid
 from tqdm.auto import tqdm
 
-from metrics import DEVICE, METRIC_TYPES_DIR, qdrant_client
+from metrics import (
+    DEVICE,
+    METRIC_TYPES_DIR,
+    MINIO_BUCKET_NAME,
+    MINIO_MAIN_PATH,
+    qdrant_client,
+    minio_client
+)
 from metrics.consts import (
     INFER_TRANSFORM,
     METRIC_COLLECTION_NAMES,
@@ -125,11 +133,11 @@ class MetricClient:
         """
         Search for similar images of random image from given collection.
         Returns tuple of images [anchor_image, grid image of k most similar images (the biggest cosine similarity)
-        # TODO: probably going to be removed as it is only helper method
         """
         img = Image.open(file)
         results = self.search(img, collection_name, limit=k)
-        imgs = [RESIZE_TRANSFORM(Image.open(r.payload["file"])) for r in results]
+        object_list = [os.path.join(MINIO_MAIN_PATH, r.payload["file"]) for r in results]
+        imgs = [RESIZE_TRANSFORM(Image.open(minio_client.get_object(MINIO_BUCKET_NAME, obj))) for obj in object_list]
         grid = make_grid(imgs)
         grid_img = torchvision.transforms.ToPILImage()(grid)
         return img, grid_img
