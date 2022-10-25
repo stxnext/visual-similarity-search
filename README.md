@@ -38,9 +38,12 @@ Visual similarity search engine demo with use of [PyTorch Metric Learning](https
   * `INTERACTIVE_APP_NAME` - name for the visual similarity search docker container,
   * `SHARED_VOLUME_DIR` - shared volume path, where data input for Qdrant is being preloaded from MinIO storage,
   * `TYPE` - environment type.
-* Run `docker-compose up -d --no-deps --build`.
-* After `QDRANT_PRELOAD_APP_NAME` ends run `docker compose restart QDRANT_APP_NAME` - this will reload pulled data to the Qdrant database.
-* Run `docker compose restart INTERACTIVE_APP_NAME` - this will reload respectable models and reestablish connection to th `QDRANT_APP_NAME`.
+* To install new environment execute one of the options below:
+  * Run command `make run-build`
+  * Run set of commands:
+    * Run `docker-compose up -d --no-deps --build`.
+    * After `QDRANT_PRELOAD_APP_NAME` ends run `docker compose restart QDRANT_APP_NAME` - this will reload pulled data to the Qdrant database.
+    * Run `docker compose restart INTERACTIVE_APP_NAME` - this will reload respectable models and reestablish connection to th `QDRANT_APP_NAME`.
 * Access the visual similarity search engine under URL: http://0.0.0.0:8080.
 
 ### Accessing the visual similarity search engine on STX Next server

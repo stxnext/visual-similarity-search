@@ -1,4 +1,5 @@
 import random
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
@@ -8,6 +9,7 @@ import torch
 import torchvision
 from loguru import logger
 from PIL import Image
+from minio import Minio
 from qdrant_client import QdrantClient
 from qdrant_client.grpc import ScoredPoint
 from torchvision.transforms.transforms import Compose
@@ -16,11 +18,11 @@ from tqdm.auto import tqdm
 
 from metrics import (
     DEVICE,
-    METRIC_TYPES_DIR,
     MINIO_BUCKET_NAME,
     MINIO_MAIN_PATH,
+    MINIO_METRIC_TYPES_DIR,
     qdrant_client,
-    minio_client
+    minio_client,
 )
 from metrics.consts import (
     INFER_TRANSFORM,
@@ -64,6 +66,7 @@ class MetricClient:
 
     def __init__(self, device_name: str = DEVICE) -> None:
         self.qdrant_client: QdrantClient = qdrant_client
+        self.minio_client: Minio = minio_client
         self.models = init_all_metric_models()
         self.device = device_name
 
@@ -110,34 +113,41 @@ class MetricClient:
         )
         return search_result
 
-    def _get_random_similar_images(
-        self, collection_name: str, k: int = 25
+    def _get_best_choice_for_uploaded_image(
+        self, img: Image.Image, collection_name: str, grid_nrow: int, k: int = 25
     ) -> Tuple[Image.Image, Image.Image]:
         """
         Search for similar images of random image from given collection.
         Returns tuple of images [anchor_image, grid image of k most similar images (the biggest cosine similarity)
-        # TODO: probably going to be removed as it is only helper method
         """
-        ds_path = METRIC_TYPES_DIR / collection_name
-        file = random.choice(list(ds_path.iterdir()))
-        img = Image.open(file)
         results = self.search(img, collection_name, limit=k)
-        imgs = [RESIZE_TRANSFORM(Image.open(r.payload["file"])) for r in results]
-        grid = make_grid(imgs)
+        object_list = [
+            os.path.join(MINIO_MAIN_PATH, r.payload["file"]) for r in results
+        ]
+        imgs = [
+            RESIZE_TRANSFORM(
+                Image.open(self.minio_client.get_object(MINIO_BUCKET_NAME, obj))
+            )
+            for obj in object_list
+        ]
+        grid = make_grid(imgs, nrow=grid_nrow)
         grid_img = torchvision.transforms.ToPILImage()(grid)
         return img, grid_img
 
-    def _get_best_choice_for_uploaded_image(
-        self, file: bytes, collection_name: str, k: int = 25
-    ) -> Tuple[Image.Image, Image.Image]:
+    def _get_random_images_from_collection(
+        self, collection_name: str, k: int = 5
+    ) -> (List[str], List[Image.Image]):
         """
-        Search for similar images of random image from given collection.
-        Returns tuple of images [anchor_image, grid image of k most similar images (the biggest cosine similarity)
+        Pulls a random set of images from a selected collection. Used for search suggestion in front-end component.
         """
-        img = Image.open(file)
-        results = self.search(img, collection_name, limit=k)
-        object_list = [os.path.join(MINIO_MAIN_PATH, r.payload["file"]) for r in results]
-        imgs = [RESIZE_TRANSFORM(Image.open(minio_client.get_object(MINIO_BUCKET_NAME, obj))) for obj in object_list]
-        grid = make_grid(imgs)
-        grid_img = torchvision.transforms.ToPILImage()(grid)
-        return img, grid_img
+        objects = self.minio_client.list_objects(
+            "ml-demo", prefix=f"{MINIO_METRIC_TYPES_DIR}/{collection_name}/"
+        )
+        object_list = [obj.object_name for obj in objects]
+        object_sample_list = random.choices(object_list, k=k)
+        captions = [obj.split("/")[-1] for obj in object_sample_list]
+        imgs = [
+            Image.open(self.minio_client.get_object("ml-demo", object_name=obj))
+            for obj in object_sample_list
+        ]
+        return captions, imgs

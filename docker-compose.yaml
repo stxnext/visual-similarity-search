@@ -32,6 +32,9 @@
         application: 'interactive'
       stdin_open: true
       tty: true
+      volumes:
+        - model_volume:/data
 
   volumes:
     qdrant_volume:
+    model_volume:

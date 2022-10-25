@@ -25,3 +25,10 @@ run-local:
 	poetry run uvicorn api.main:app --proxy-headers --host 0.0.0.0 --port 8000
 
 run-clean: generate-req run-docker
+
+run-build:
+	docker-compose up -d --no-deps --build ;\
+	sleep 360 ;\
+	docker compose restart qdrant ;\
+	sleep 5 ;\
+	docker compose restart interactive

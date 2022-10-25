@@ -28,12 +28,15 @@ def shoes_filter(meta: List[Dict]) -> List[Dict]:
 
 # TODO: check if we need wrapper func for singleton client
 def create_collection(
-    client: QdrantClient, collection_name: str, vector_size: int, distance: Union[Distance, DISTANCES]
+    client: QdrantClient,
+    collection_name: str,
+    vector_size: int,
+    distance: Union[Distance, DISTANCES],
 ):
     """Wrapper function for auto injecting qdrant client object and creating collection"""
     client.recreate_collection(
         collection_name=collection_name,
-        vectors_config=models.VectorParams(size=vector_size, distance=distance)
+        vectors_config=models.VectorParams(size=vector_size, distance=distance),
     )
 
 
@@ -54,7 +57,7 @@ def upload_indexes(
     embeddings = []
     meta_data = []
     df = dataset.df
-    df = df.fillna('')  # JSON does not support np.nan and pd.NaN
+    df = df.fillna("")  # JSON does not support np.nan and pd.NaN
     logger.info(f"Started indexing {len(df)} vectors for collection {collection_name}")
     for i, row in tqdm(df.iterrows(), total=df.shape[0]):
         img = INFER_TRANSFORM(Image.open(row["file"]).convert("RGB"))

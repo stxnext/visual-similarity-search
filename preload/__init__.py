@@ -12,10 +12,11 @@ DATA_DIR = "data"
 MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME")
 MINIO_MAIN_PATH = os.getenv("MINIO_MAIN_PATH")
 MINIO_DATA_DIR = os.path.join(MINIO_MAIN_PATH, "data")
+METRIC_COLLECTION_NAMES = ["dogs", "shoes"]
 
 minio_client = Minio(
     os.getenv("MINIO_HOST"),
     access_key=os.getenv("MINIO_ACCESS_KEY"),
     secret_key=os.getenv("MINIO_SECRET_KEY"),
-    secure=True
+    secure=True,
 )

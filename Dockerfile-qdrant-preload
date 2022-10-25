@@ -11,7 +11,7 @@ WORKDIR /$APP_NAME
 
 RUN mkdir -p "/${SHARED_VOLUME_DIR}"
 RUN pip install --upgrade pip --no-input
-RUN pip install --no-cache-dir minio python-dotenv
+RUN pip install --no-cache-dir minio python-dotenv loguru
 
 # Update env variables
 ENV PATH /root/.local/bin:$PATH
