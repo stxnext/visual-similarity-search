@@ -1,4 +1,3 @@
 #!/bin/sh
 
-#exec streamlit run interactive/searchApp.py --server.port=8080
-exec streamlit run interactive/searchApp.py --server.port=8080 --server.address=0.0.0.0
+exec streamlit run interactive/searchApp.py --server.port=$INTERACTIVE_PORT --server.address=0.0.0.0

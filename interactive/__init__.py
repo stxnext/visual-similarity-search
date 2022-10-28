@@ -11,7 +11,7 @@ CATEGORY_DESCR = {
         "source": "https://www.kaggle.com/datasets/jessicali9530/stanford-dogs-dataset",
     },
     "shoes": {
-        "description": "Shoes - 4 major categories followed by functional types and individual brands",
+        "description": "Shoes - 4 major categories with individual brands",
         "source": "https://www.kaggle.com/datasets/aryashah2k/large-shoe-dataset-ut-zappos50k",
     },
 }

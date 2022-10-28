@@ -1,14 +1,16 @@
 import random
+import textwrap
 
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
+import matplotlib.pyplot as plt
 
 import os
 import torch
 import torchvision
 from loguru import logger
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from minio import Minio
 from qdrant_client import QdrantClient
 from qdrant_client.grpc import ScoredPoint
@@ -18,9 +20,10 @@ from tqdm.auto import tqdm
 
 from metrics import (
     DEVICE,
+    METRIC_DATASETS_DIR,
     MINIO_BUCKET_NAME,
     MINIO_MAIN_PATH,
-    MINIO_METRIC_TYPES_DIR,
+    MINIO_METRIC_DATASETS_DIR,
     qdrant_client,
     minio_client,
 )
@@ -114,25 +117,43 @@ class MetricClient:
         return search_result
 
     def _get_best_choice_for_uploaded_image(
-        self, img: Image.Image, collection_name: str, grid_nrow: int, k: int = 25
-    ) -> Tuple[Image.Image, Image.Image]:
+        self, base_img: Image.Image, collection_name: str, benchmark: int, k: int = 25
+    ) -> Tuple[Image.Image, List[Image.Image]]:
         """
         Search for similar images of random image from given collection.
         Returns tuple of images [anchor_image, grid image of k most similar images (the biggest cosine similarity)
         """
-        results = self.search(img, collection_name, limit=k)
-        object_list = [
-            os.path.join(MINIO_MAIN_PATH, r.payload["file"]) for r in results
-        ]
-        imgs = [
-            RESIZE_TRANSFORM(
-                Image.open(self.minio_client.get_object(MINIO_BUCKET_NAME, obj))
-            )
-            for obj in object_list
-        ]
-        grid = make_grid(imgs, nrow=grid_nrow)
-        grid_img = torchvision.transforms.ToPILImage()(grid)
-        return img, grid_img
+        results = self.search(base_img, collection_name, limit=k)
+        results_bench = [r for r in results if round(r.score, 4) >= benchmark / 100]
+        scores_bench = [100 * round(r.score, 4) for r in results_bench]
+        if len(results_bench) > 0:
+            if os.getenv("TYPE") == "LOCAL":
+                object_list = [r.payload["file"] for r in results_bench]
+                imgs = [RESIZE_TRANSFORM(Image.open(obj)) for obj in object_list]
+            else:
+                object_list = [
+                    os.path.join(MINIO_MAIN_PATH, r.payload["file"])
+                    for r in results_bench
+                ]
+                imgs = [
+                    RESIZE_TRANSFORM(
+                        Image.open(self.minio_client.get_object(MINIO_BUCKET_NAME, obj))
+                    )
+                    for obj in object_list
+                ]
+            to_image = torchvision.transforms.ToPILImage()
+            imgs_transformed = [to_image(img) for img in imgs]
+            for i, img in enumerate(imgs_transformed):
+                draw = ImageDraw.Draw(img)
+                draw.text(
+                    xy=(10, 10),
+                    text="{0:.2f}%".format(scores_bench[i]),
+                    font=ImageFont.truetype("DejaVuSans-Bold.ttf", 40),
+                    fill=(0, 255, 0),
+                )
+        else:
+            imgs_transformed = None
+        return base_img, imgs_transformed
 
     def _get_random_images_from_collection(
         self, collection_name: str, k: int = 5
@@ -140,14 +161,21 @@ class MetricClient:
         """
         Pulls a random set of images from a selected collection. Used for search suggestion in front-end component.
         """
-        objects = self.minio_client.list_objects(
-            "ml-demo", prefix=f"{MINIO_METRIC_TYPES_DIR}/{collection_name}/"
-        )
-        object_list = [obj.object_name for obj in objects]
-        object_sample_list = random.choices(object_list, k=k)
-        captions = [obj.split("/")[-1] for obj in object_sample_list]
-        imgs = [
-            Image.open(self.minio_client.get_object("ml-demo", object_name=obj))
-            for obj in object_sample_list
-        ]
+        if os.getenv("TYPE") == "LOCAL":
+            local_collection_dir = f"{METRIC_DATASETS_DIR}/{collection_name}"
+            captions = os.listdir(local_collection_dir)
+            imgs = [
+                Image.open(f"{local_collection_dir}/{caption}") for caption in captions
+            ]
+        else:
+            objects = self.minio_client.list_objects(
+                "ml-demo", prefix=f"{MINIO_METRIC_DATASETS_DIR}/{collection_name}/"
+            )
+            object_list = [obj.object_name for obj in objects]
+            object_sample_list = random.choices(object_list, k=k)
+            captions = [obj.split("/")[-1] for obj in object_sample_list]
+            imgs = [
+                Image.open(self.minio_client.get_object("ml-demo", object_name=obj))
+                for obj in object_sample_list
+            ]
         return captions, imgs

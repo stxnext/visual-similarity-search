@@ -7,7 +7,7 @@ from minio import Minio
 load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
 QDRANT_PRELOAD_APP_NAME = os.getenv("QDRANT_PRELOAD_APP_NAME")
-SHARED_VOLUME_DIR = os.getenv("SHARED_VOLUME_DIR")
+QDRANT_VOLUME_DIR = os.getenv("QDRANT_VOLUME_DIR")
 DATA_DIR = "data"
 MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME")
 MINIO_MAIN_PATH = os.getenv("MINIO_MAIN_PATH")

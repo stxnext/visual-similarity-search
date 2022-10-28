@@ -8,7 +8,7 @@ from distutils.dir_util import copy_tree
 from preload import (
     minio_client,
     QDRANT_PRELOAD_APP_NAME,
-    SHARED_VOLUME_DIR,
+    QDRANT_VOLUME_DIR,
     MINIO_BUCKET_NAME,
     MINIO_DATA_DIR,
     METRIC_COLLECTION_NAMES,
@@ -68,7 +68,7 @@ def preload_and_unzip_qdrant_database(
 
 if __name__ == "__main__":
     logger.info("Process Started")
-    local_path = os.path.join(QDRANT_PRELOAD_APP_NAME, SHARED_VOLUME_DIR)
+    local_path = os.path.join(QDRANT_PRELOAD_APP_NAME, QDRANT_VOLUME_DIR)
     file_path = os.path.join(local_path, STORAGE_NAME)
     object_name = os.path.join(MINIO_DATA_DIR, STORAGE_NAME)
 

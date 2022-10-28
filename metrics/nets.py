@@ -87,13 +87,17 @@ def get_trunk_embedder(
     embedder = EmbeddingNN([trunk_output_size] + layer_sizes).to(DEVICE)
     if weights:
         if not os.path.exists(weights["trunk_local"]):
-            minio_client.fget_object(
-                MINIO_BUCKET_NAME, weights["trunk_minio"], weights["trunk_local"]
-            )
+            if os.getenv("TYPE") != "LOCAL":
+                minio_client.fget_object(
+                    MINIO_BUCKET_NAME, weights["trunk_minio"], weights["trunk_local"]
+                )
         if not os.path.exists(weights["embedder_local"]):
-            minio_client.fget_object(
-                MINIO_BUCKET_NAME, weights["embedder_minio"], weights["embedder_local"]
-            )
+            if os.getenv("TYPE") != "LOCAL":
+                minio_client.fget_object(
+                    MINIO_BUCKET_NAME,
+                    weights["embedder_minio"],
+                    weights["embedder_local"],
+                )
         trunk.load_state_dict(torch.load(weights["trunk_local"], map_location=DEVICE))
         embedder.load_state_dict(
             torch.load(weights["embedder_local"], map_location=DEVICE)
@@ -110,12 +114,16 @@ def get_full_pretrained_model(
     """Get full pretrained model with loaded weights"""
     if model_name not in METRIC_COLLECTION_NAMES:
         raise UnsupportedModel(model_name)
-    meta = json.load(
-        minio_client.get_object(
-            bucket_name=MINIO_BUCKET_NAME,
-            object_name=os.path.join(MINIO_MODELS_DIR, model_name, "meta.json"),
+    if os.getenv("TYPE") == "LOCAL":
+        with open(os.path.join(MODELS_DIR, model_name, "meta.json")) as f:
+            meta = json.load(f)
+    else:
+        meta = json.load(
+            minio_client.get_object(
+                bucket_name=MINIO_BUCKET_NAME,
+                object_name=os.path.join(MINIO_MODELS_DIR, model_name, "meta.json"),
+            )
         )
-    )
     weights = {
         "trunk_minio": os.path.join(MINIO_MODELS_DIR, model_name, "trunk.pth"),
         "embedder_minio": os.path.join(MINIO_MODELS_DIR, model_name, "embedder.pth"),

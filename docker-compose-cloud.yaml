@@ -1,0 +1,40 @@
+  version: '3.7'
+
+  services:
+    qdrant-cloud:
+      image: qdrant/qdrant:${QDRANT_VERSION}
+      container_name: qdrant-cloud
+      ports:
+        - "${QDRANT_PORT}:${QDRANT_PORT}"
+      env_file:
+        - .env-cloud
+      volumes:
+        - qdrant_volume:/${QDRANT_VOLUME_DIR}
+    qdrant_preload-cloud:
+      build:
+        context: ./
+        dockerfile: Dockerfile-qdrant-preload
+      container_name: qdrant_preload-cloud
+      env_file:
+        - .env-cloud
+      volumes:
+        - qdrant_volume:/${QDRANT_PRELOAD_APP_NAME}/${QDRANT_VOLUME_DIR}
+    interactive-cloud:
+      build:
+        context: ./
+        dockerfile: Dockerfile-interactive
+      container_name: interactive-cloud
+      ports:
+        - "${INTERACTIVE_PORT}:${INTERACTIVE_PORT}"
+      env_file:
+        - .env-cloud
+      labels:
+        application: 'interactive'
+      stdin_open: true
+      tty: true
+      volumes:
+        - model_volume:/${MODEL_VOLUME_DIR}
+
+  volumes:
+    qdrant_volume:
+    model_volume:

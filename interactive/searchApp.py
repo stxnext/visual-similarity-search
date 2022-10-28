@@ -1,177 +1,205 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 from loguru import logger
 from PIL import Image
-from streamlit_image_select import image_select
 
 from interactive import CATEGORY_DESCR, IMAGE_EXAMPLES
 from metrics.consts import METRIC_COLLECTION_NAMES
-from metrics.core import MetricClient
-
-logger.info("Store the initial value of widgets in session state")
-if "client" not in st.session_state:
-    st.session_state.client = MetricClient()
-    st.session_state.category_desc_option = None
-    st.session_state.category_option = None
-    st.session_state.similar_img_number = None
-    st.session_state.upload_option = None
-    st.session_state.selected_img = None
-    st.session_state.pull_random_img_number = None
-    st.session_state.refresh_random_images = True
-    st.session_state.random_captions = None
-    st.session_state.random_imgs = None
-    st.session_state.similar_images_found = None
-    st.session_state.grid_nrow_number = None
+from interactive.st_utils import (
+    add_bg_from_local,
+    initialize_state,
+    reset_all_states_button,
+    reset_states_after_upload_option_button,
+    add_filter_option,
+)
 
 
-st.write(""" # Visual Similarity Search Engine """)
+logger.info("Set main graphical options and initial paragraph.")
+st.set_page_config(layout="wide")
+add_bg_from_local("interactive/assets/green_overlay.png")
+button_component = components.html("""
+<script>
+const button_elements = window.parent.document.querySelectorAll('.stButton > button')
+button_elements[0].style.backgroundColor = 'lightcoral'
+button_elements[1].style.backgroundColor = 'lightblue'
+button_elements[2].style.backgroundColor = 'lightgreen'
+</script>
+""",
+    height=0,
+    width=0
+)
+st.title("Visual Similarity Search Engine")
 st.write(
     """ 
-    Returns a set of user-defined number of images from a selected category. 
-    This set contains images with the highest degree of similarity to the uploaded image.
-    Returned images are pulled from the cloud storage and similarity is calculated based on the vectors stored in the Qdrant database.
+    Returns a set number of images from a selected category. 
+    This set contains images with the highest degree of similarity to the uploaded/selected image.
+    Returned images are pulled from the local or cloud storage and similarity is calculated based on the vectors stored
+    in the Qdrant database.
     Algorithm uses image embeddings and deep neural networks to determine a value of cosine similarity metric.
 """
 )
 
-st.write(""" ## Find Similar Images within Category """)
+logger.info("Create and store initial values of widgets in a session state dictionary.")
+initialize_state()
 
-st.session_state.category_desc_option = st.selectbox(
-    label="Which category you would like to search from?",
-    options=tuple(
-        [CATEGORY_DESCR[cat]["description"] for cat in METRIC_COLLECTION_NAMES]
-    ),
-)
+logger.info("Sidebar - Input Options")
+st.sidebar.image("interactive/assets/stxnext_web_color@1x.png")
+st.sidebar.header("Input Options")
+if st.sidebar.button("Reset All"):
+    reset_all_states_button()
 
-st.session_state.category_option = [
-    cat
-    for cat, d in CATEGORY_DESCR.items()
-    if d["description"] == st.session_state.category_desc_option
-][0]
+logger.info("Sidebar - Category Selection")
+add_filter_option(text="Which category would you like to search from?")
+for category in METRIC_COLLECTION_NAMES:
+    if st.sidebar.button(CATEGORY_DESCR[category]["description"]):
+        st.session_state.category_desc_option = CATEGORY_DESCR[category]["description"]
+        st.session_state.category_option = category
 
-st.session_state.similar_img_number = st.number_input(
-    label="Insert a number of similar images to show.",
-    value=10,
-    min_value=1,
-    max_value=25,
-    format="%i",
-)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.session_state.upload_option = st.selectbox(
-        label="How would you like to add an image?",
-        options=(
-            "File Upload",
-            "Image Chosen From the Example List",
-            "Pull Randomly from Cloud Storage",
-        ),
+logger.info("Sidebar - Image Provisioning")
+upload_options = [
+    "Example List",
+    "Pull Randomly from the Storage",
+    "File Upload",
+]
+if st.session_state.category_option is not None:
+    add_filter_option(text="How would you like to add an image?")
+    st.session_state.upload_option = st.sidebar.radio(
+        label="",
+        options=tuple(upload_options),
     )
-with col2:
-    if st.session_state.upload_option == "File Upload":
-        byte_img = st.file_uploader("Choose a file.")
-        if byte_img is not None:
-            st.session_state.selected_img = Image.open(byte_img)
-        else:
-            st.session_state.selected_img = False
-    elif st.session_state.upload_option == "Image Chosen From the Example List":
-        st.session_state.selected_img = image_select(
-            f"Choose an image from {st.session_state.category_option} category",
-            images=[
-                Image.open(s_img["path"])
-                for s_img in IMAGE_EXAMPLES[st.session_state.category_option]
-            ],
-            captions=[
-                s_img["label"]
-                for s_img in IMAGE_EXAMPLES[st.session_state.category_option]
-            ],
+
+logger.info("Sidebar - Image Selection")
+if st.session_state.category_option is not None:
+    if st.session_state.upload_option == upload_options[0]:
+        reset_states_after_upload_option_button()
+        st.session_state.example_captions = [
+            s_img["label"] for s_img in IMAGE_EXAMPLES[st.session_state.category_option]
+        ]
+        st.session_state.example_imgs = [
+            Image.open(s_img["path"])
+            for s_img in IMAGE_EXAMPLES[st.session_state.category_option]
+        ]
+        example_images_zip = dict(
+            zip(st.session_state.example_captions, st.session_state.example_imgs)
         )
-        if st.button("Reset Images"):
-            st.session_state.refresh_random_images = True
-            st.session_state.random_captions = None
-            st.session_state.random_imgs = None
-            st.session_state.selected_img = None
-    elif st.session_state.upload_option == "Pull Randomly from Cloud Storage":
-        st.write(f"Choose an image from {st.session_state.category_option} category")
-        st.session_state.pull_random_img_number = st.number_input(
-            label="Insert a number of similar images to show.",
+        logger.info("Sidebar - Category Selection")
+        add_filter_option(text=f"Choose an image - {st.session_state.category_option}.")
+        img_selection = st.sidebar.selectbox("", example_images_zip)
+        st.session_state.selected_img = example_images_zip[img_selection]
+        st.session_state.show_input_img = True
+    elif st.session_state.upload_option == upload_options[1]:
+        reset_states_after_upload_option_button()
+        add_filter_option(
+            text=f"Choose random images from {st.session_state.category_option} category."
+        )
+        st.session_state.pull_random_img_number = st.sidebar.number_input(
+            label="",
             value=5,
             min_value=1,
-            max_value=10,
             format="%i",
         )
-        if st.button("Generate Images"):
-            if st.session_state.refresh_random_images:
-                (
-                    st.session_state.random_captions,
-                    st.session_state.random_imgs,
-                ) = st.session_state.client._get_random_images_from_collection(
-                    collection_name=st.session_state.category_option,
-                    k=st.session_state.pull_random_img_number,
-                )
-                st.session_state.refresh_random_images = False
-            else:
-                st.write('Use "Reset Images" button first.')
-        if not st.session_state.refresh_random_images:
-            if st.button("Reset Images"):
-                st.session_state.refresh_random_images = True
-                st.session_state.random_captions = None
-                st.session_state.random_imgs = None
-                st.session_state.selected_img = None
+        if st.sidebar.button("Generate Images"):
+            (
+                st.session_state.random_captions,
+                st.session_state.random_imgs,
+            ) = st.session_state.client._get_random_images_from_collection(
+                collection_name=st.session_state.category_option,
+                k=st.session_state.pull_random_img_number,
+            )
         if (
             st.session_state.random_captions is not None
             and st.session_state.random_imgs is not None
         ):
-            images_zip = dict(
+            random_images_zip = dict(
                 zip(st.session_state.random_captions, st.session_state.random_imgs)
             )
-            img_selection = st.selectbox("Choose an item", images_zip)
-            st.session_state.selected_img = images_zip[img_selection]
-            st.image(st.session_state.selected_img)
+            img_selection = st.sidebar.selectbox("Choose an item", random_images_zip)
+            st.session_state.selected_img = random_images_zip[img_selection]
+            st.session_state.show_input_img = True
+        else:
+            st.session_state.selected_img = None
+    elif st.session_state.upload_option == upload_options[2]:
+        reset_states_after_upload_option_button()
+        byte_img = st.sidebar.file_uploader("Choose a file.")
+        if byte_img is not None:
+            st.session_state.selected_img = Image.open(byte_img)
+            st.session_state.show_input_img = True
         else:
             st.session_state.selected_img = None
 
-if (
-    st.session_state.category_option
-    and st.session_state.similar_img_number
-    and st.session_state.selected_img
-):
-    st.write(""" ### Similar Images Search """)
-    st.session_state.grid_nrow_number = st.number_input(
-        label="Insert a maximum number of images in the row.",
-        value=3,
+logger.info("Main View - Input Image")
+if st.session_state.show_input_img:
+    st.header("Input Image")
+    input_img_placeholder = st.empty()
+    input_img_placeholder.image(st.session_state.selected_img)
+
+
+if st.session_state.category_option and st.session_state.selected_img:
+    logger.info("Sidebar - Search Options Selection")
+    st.sidebar.write("")
+    st.sidebar.header("Search Options")
+    add_filter_option(
+        text="Insert a number of similar images to show.", no_linebreaks=True
+    )
+    st.session_state.similar_img_number = st.sidebar.number_input(
+        label="",
+        value=9,
         min_value=1,
-        max_value=5,
         format="%i",
     )
+    add_filter_option(
+        text="Insert a benchmark similarity value (in %).", no_linebreaks=True
+    )
+    st.session_state.benchmark_similarity_value = st.sidebar.number_input(
+        label="",
+        value=50,
+        min_value=0,
+        max_value=100,
+        format="%i",
+    )
+    st.session_state.grid_nrow_number = 3
+    add_filter_option(text="")
+
+    logger.info("Main View - Output Images")
     if st.button("Find Similar Images"):
 
-        def search_with_show(collection: str, k: int, grid_nrow: int, file):
+        def search_with_show(
+            collection: str, k: int, grid_nrow: int, benchmark: int, file
+        ):
             (
                 anchor,
                 similars,
             ) = st.session_state.client._get_best_choice_for_uploaded_image(
-                img=file,
+                base_img=file,
                 collection_name=collection,
                 k=k,
-                grid_nrow=grid_nrow,
+                benchmark=benchmark,
             )
-            st.write(
-                f"Searched for {st.session_state.similar_img_number} images in {st.session_state.category_desc_option} category."
-            )
-            st.image(similars)
+            if similars is not None:
+                st.write(
+                    f'Found {st.session_state.similar_img_number} images in the "{st.session_state.category_option}" category.'
+                )
+                st.write(
+                    f'In the top left corner of every image a similarity coefficient is presented - it shows a level of similarity between a given image and an input image.'
+                )
+                col_nr = min(grid_nrow, len(similars))
+                for i, col in enumerate(st.columns(col_nr)):
+                    col_imgs = similars[i::col_nr]
+                    with col:
+                        for col_img in col_imgs:
+                            st.image(col_img)
+            else:
+                st.write(f"No images found for the benchmark of {benchmark}%.")
 
-        try:
-            search_with_show(
-                file=st.session_state.selected_img,
-                collection=st.session_state.category_option,
-                k=st.session_state.similar_img_number,
-                grid_nrow=st.session_state.grid_nrow_number,
-            )
-            st.session_state.similar_images_found = True
-        except:
-            st.write("File not selected")
+        st.header("Similar Images")
+        search_with_show(
+            file=st.session_state.selected_img,
+            collection=st.session_state.category_option,
+            k=st.session_state.similar_img_number,
+            grid_nrow=st.session_state.grid_nrow_number,
+            benchmark=st.session_state.benchmark_similarity_value,
+        )
 
-        if st.button("Reset"):
-            st.session_state.similar_images_found = False
+        if st.button("Reset Images"):
+            reset_all_states_button()
