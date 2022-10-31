@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 
 from loguru import logger
 from PIL import Image
@@ -7,28 +6,23 @@ from PIL import Image
 from interactive import CATEGORY_DESCR, IMAGE_EXAMPLES
 from metrics.consts import METRIC_COLLECTION_NAMES
 from interactive.st_utils import (
-    add_bg_from_local,
+    widget_formatting,
     initialize_state,
     reset_all_states_button,
     reset_states_after_upload_option_button,
-    add_filter_option,
 )
 
 
 logger.info("Set main graphical options and initial paragraph.")
 st.set_page_config(layout="wide")
-add_bg_from_local("interactive/assets/green_overlay.png")
-button_component = components.html("""
-<script>
-const button_elements = window.parent.document.querySelectorAll('.stButton > button')
-button_elements[0].style.backgroundColor = 'lightcoral'
-button_elements[1].style.backgroundColor = 'lightblue'
-button_elements[2].style.backgroundColor = 'lightgreen'
-</script>
-""",
-    height=0,
-    width=0
-)
+widget_formatting()
+colLogo1, colLogo2, col3Logo = st.columns([1, 1, 1])
+with colLogo1:
+    st.write("")
+with colLogo2:
+    st.image("interactive/assets/stxnext_web_color@1x.png")
+with col3Logo:
+    st.write("")
 st.title("Visual Similarity Search Engine")
 st.write(
     """ 
@@ -43,90 +37,98 @@ st.write(
 logger.info("Create and store initial values of widgets in a session state dictionary.")
 initialize_state()
 
-logger.info("Sidebar - Input Options")
-st.sidebar.image("interactive/assets/stxnext_web_color@1x.png")
-st.sidebar.header("Input Options")
-if st.sidebar.button("Reset All"):
+logger.info("Filters")
+st.header("Input Options")
+if st.button("Reset All"):
     reset_all_states_button()
 
-logger.info("Sidebar - Category Selection")
-add_filter_option(text="Which category would you like to search from?")
+logger.info("Category Selection")
+st.write("")
+st.markdown(
+    f'<p class="big-font">Which category would you like to search from?</p>',
+    unsafe_allow_html=True,
+)
 for category in METRIC_COLLECTION_NAMES:
-    if st.sidebar.button(CATEGORY_DESCR[category]["description"]):
+    if st.button(CATEGORY_DESCR[category]["description"]):
         st.session_state.category_desc_option = CATEGORY_DESCR[category]["description"]
         st.session_state.category_option = category
+st.write("")
 
-logger.info("Sidebar - Image Provisioning")
-upload_options = [
-    "Example List",
-    "Pull Randomly from the Storage",
-    "File Upload",
-]
-if st.session_state.category_option is not None:
-    add_filter_option(text="How would you like to add an image?")
-    st.session_state.upload_option = st.sidebar.radio(
-        label="",
-        options=tuple(upload_options),
-    )
-
-logger.info("Sidebar - Image Selection")
-if st.session_state.category_option is not None:
-    if st.session_state.upload_option == upload_options[0]:
-        reset_states_after_upload_option_button()
-        st.session_state.example_captions = [
-            s_img["label"] for s_img in IMAGE_EXAMPLES[st.session_state.category_option]
-        ]
-        st.session_state.example_imgs = [
-            Image.open(s_img["path"])
-            for s_img in IMAGE_EXAMPLES[st.session_state.category_option]
-        ]
-        example_images_zip = dict(
-            zip(st.session_state.example_captions, st.session_state.example_imgs)
+colImage1, colImage2 = st.columns([1, 1])
+with colImage1:
+    logger.info("Image Provisioning")
+    upload_options = [
+        "Example List",
+        "Pull Randomly from the Storage",
+        "File Upload",
+    ]
+    if st.session_state.category_option is not None:
+        st.session_state.upload_option = st.radio(
+            label="How would you like to add an image?",
+            options=tuple(upload_options),
         )
-        logger.info("Sidebar - Category Selection")
-        add_filter_option(text=f"Choose an image - {st.session_state.category_option}.")
-        img_selection = st.sidebar.selectbox("", example_images_zip)
-        st.session_state.selected_img = example_images_zip[img_selection]
-        st.session_state.show_input_img = True
-    elif st.session_state.upload_option == upload_options[1]:
-        reset_states_after_upload_option_button()
-        add_filter_option(
-            text=f"Choose random images from {st.session_state.category_option} category."
-        )
-        st.session_state.pull_random_img_number = st.sidebar.number_input(
-            label="",
-            value=5,
-            min_value=1,
-            format="%i",
-        )
-        if st.sidebar.button("Generate Images"):
-            (
-                st.session_state.random_captions,
-                st.session_state.random_imgs,
-            ) = st.session_state.client._get_random_images_from_collection(
-                collection_name=st.session_state.category_option,
-                k=st.session_state.pull_random_img_number,
+with colImage2:
+    logger.info("Image Selection")
+    if st.session_state.category_option is not None:
+        if st.session_state.upload_option == upload_options[0]:
+            reset_states_after_upload_option_button()
+            st.session_state.example_captions = [
+                s_img["label"]
+                for s_img in IMAGE_EXAMPLES[st.session_state.category_option]
+            ]
+            st.session_state.example_imgs = [
+                Image.open(s_img["path"])
+                for s_img in IMAGE_EXAMPLES[st.session_state.category_option]
+            ]
+            example_images_zip = dict(
+                zip(st.session_state.example_captions, st.session_state.example_imgs)
             )
-        if (
-            st.session_state.random_captions is not None
-            and st.session_state.random_imgs is not None
-        ):
-            random_images_zip = dict(
-                zip(st.session_state.random_captions, st.session_state.random_imgs)
+            logger.info("Category Selection")
+            img_selection = st.selectbox(
+                f"Choose an image - {st.session_state.category_option}.",
+                example_images_zip,
             )
-            img_selection = st.sidebar.selectbox("Choose an item", random_images_zip)
-            st.session_state.selected_img = random_images_zip[img_selection]
+            st.session_state.selected_img = example_images_zip[img_selection]
             st.session_state.show_input_img = True
-        else:
-            st.session_state.selected_img = None
-    elif st.session_state.upload_option == upload_options[2]:
-        reset_states_after_upload_option_button()
-        byte_img = st.sidebar.file_uploader("Choose a file.")
-        if byte_img is not None:
-            st.session_state.selected_img = Image.open(byte_img)
-            st.session_state.show_input_img = True
-        else:
-            st.session_state.selected_img = None
+        elif st.session_state.upload_option == upload_options[1]:
+            reset_states_after_upload_option_button()
+            st.session_state.pull_random_img_number = st.number_input(
+                label=f"Choose random images from {st.session_state.category_option} category.",
+                value=5,
+                min_value=1,
+                format="%i",
+            )
+            if st.button("Generate Images"):
+                (
+                    st.session_state.random_captions,
+                    st.session_state.random_imgs,
+                ) = st.session_state.client._get_random_images_from_collection(
+                    collection_name=st.session_state.category_option,
+                    k=st.session_state.pull_random_img_number,
+                )
+            if (
+                st.session_state.random_captions is not None
+                and st.session_state.random_imgs is not None
+            ):
+                random_images_zip = dict(
+                    zip(st.session_state.random_captions, st.session_state.random_imgs)
+                )
+                img_selection = st.selectbox("Choose an item", random_images_zip)
+                st.session_state.selected_img = random_images_zip[img_selection]
+                st.session_state.show_input_img = True
+            else:
+                st.session_state.selected_img = None
+        elif st.session_state.upload_option == upload_options[2]:
+            reset_states_after_upload_option_button()
+            st.markdown(
+                f'<p class="big-font">Choose a file.</p>', unsafe_allow_html=True
+            )
+            byte_img = st.file_uploader("Upload an image from a local disk.")
+            if byte_img is not None:
+                st.session_state.selected_img = Image.open(byte_img)
+                st.session_state.show_input_img = True
+            else:
+                st.session_state.selected_img = None
 
 logger.info("Main View - Input Image")
 if st.session_state.show_input_img:
@@ -136,30 +138,25 @@ if st.session_state.show_input_img:
 
 
 if st.session_state.category_option and st.session_state.selected_img:
-    logger.info("Sidebar - Search Options Selection")
-    st.sidebar.write("")
-    st.sidebar.header("Search Options")
-    add_filter_option(
-        text="Insert a number of similar images to show.", no_linebreaks=True
-    )
-    st.session_state.similar_img_number = st.sidebar.number_input(
-        label="",
-        value=9,
-        min_value=1,
-        format="%i",
-    )
-    add_filter_option(
-        text="Insert a benchmark similarity value (in %).", no_linebreaks=True
-    )
-    st.session_state.benchmark_similarity_value = st.sidebar.number_input(
-        label="",
-        value=50,
-        min_value=0,
-        max_value=100,
-        format="%i",
-    )
+    logger.info("Search Options Selection")
+    st.subheader("Search Options")
+    colSearch1, colSearch2 = st.columns([1, 1])
+    with colSearch1:
+        st.session_state.similar_img_number = st.number_input(
+            label="Insert a number of similar images to show.",
+            value=9,
+            min_value=1,
+            format="%i",
+        )
+    with colSearch2:
+        st.session_state.benchmark_similarity_value = st.number_input(
+            label="Insert a benchmark similarity value (in %).",
+            value=50,
+            min_value=0,
+            max_value=100,
+            format="%i",
+        )
     st.session_state.grid_nrow_number = 3
-    add_filter_option(text="")
 
     logger.info("Main View - Output Images")
     if st.button("Find Similar Images"):
@@ -181,7 +178,7 @@ if st.session_state.category_option and st.session_state.selected_img:
                     f'Found {st.session_state.similar_img_number} images in the "{st.session_state.category_option}" category.'
                 )
                 st.write(
-                    f'In the top left corner of every image a similarity coefficient is presented - it shows a level of similarity between a given image and an input image.'
+                    f"In the top left corner of every image a similarity coefficient is presented - it shows a level of similarity between a given image and an input image."
                 )
                 col_nr = min(grid_nrow, len(similars))
                 for i, col in enumerate(st.columns(col_nr)):
@@ -190,7 +187,9 @@ if st.session_state.category_option and st.session_state.selected_img:
                         for col_img in col_imgs:
                             st.image(col_img)
             else:
-                st.write(f"No images found for the benchmark of {benchmark}%.")
+                st.write(
+                    f"No images found for the similarity benchmark of {benchmark}%."
+                )
 
         st.header("Similar Images")
         search_with_show(

@@ -1,5 +1,3 @@
-import base64
-
 import streamlit as st
 
 from metrics.core import MetricClient
@@ -60,25 +58,28 @@ def reset_all_states_button():
     st.session_state.similar_images_found = None
 
 
-def add_filter_option(text: str, no_linebreaks: bool = False):
-    if not no_linebreaks:
-        st.sidebar.write("")
-        st.sidebar.write("")
-    st.sidebar.markdown(f'<p class="big-font">{text}</p>', unsafe_allow_html=True)
-
-
-def add_bg_from_local(image_file):
-    with open(image_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
+def widget_formatting():
     st.markdown(
         f"""
         <style>
-        .stApp {{
-            background-image: url(data:image/{"png"};base64,{encoded_string.decode()});
-            background-size: cover;
+        .row-widget.stRadio > label {{
+            font-size: 18px;
+            font-weight: bold;
+        }}
+        .row-widget.stSelectbox > label {{
+            font-size: 18px;
+            font-weight: bold;
+        }}
+        .stNumberInput > label {{
+            font-size: 18px;
+            font-weight: bold;
+        }}
+        .stFileUploader > label {{
+            font-size: 18px;
+            font-weight: bold;
         }}
         .big-font {{
-            font-size:13px !important;
+            font-size:18px !important;
             font-weight:bold; 
         }}
         </style>
