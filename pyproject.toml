@@ -2,7 +2,7 @@
 name = "metrics"
 version = "0.1.0"
 description = ""
-authors = ["Szymon Idziniak <szymon.idziniak@stxnext.pl>"]
+authors = ["Szymon Idziniak <szymon.idziniak@stxnext.pl>", "Bartosz Mielczarek <bartosz.mielczarek@stxnext.pl>"]
 
 # TODO: add torch into poetry dependencies,
 # so it will be easier to build container just with requirements.txt dump from poetry
@@ -29,6 +29,7 @@ loguru = "^0.6.0"
 streamlit = "^1.13.0"
 minio = "^7.1.12"
 streamlit-image-select = "^0.2.0"
+faiss-cpu = "^1.7.2"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"

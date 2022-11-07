@@ -4,6 +4,12 @@ data/
 # PyCharm
 .idea/
 
+# Database files
+*.db
+
+# Pytorch Model files
+*.pth
+
 # VSCode
 .vscode/*
 !.vscode/settings.json
@@ -27,7 +33,7 @@ data/
 node_modules/
 creds.js
 
-# Private Files
+# Data Files
 *.json
 *.csv
 *.csv.gz
@@ -35,10 +41,8 @@ creds.js
 *.tsv.gz
 *.xlsx
 
-
 # Mac/OSX
 .DS_Store
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -148,7 +152,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .env-local
 .env-cloud
 .venv
