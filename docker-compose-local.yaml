@@ -8,6 +8,7 @@
         - "${QDRANT_PORT}:${QDRANT_PORT}"
       env_file:
         - .env-local
+        - .env
       volumes:
         - ./data/qdrant_storage:/${QDRANT_VOLUME_DIR}
     interactive-local:
@@ -19,13 +20,10 @@
         - "${INTERACTIVE_PORT}:${INTERACTIVE_PORT}"
       env_file:
         - .env-local
+        - .env
       labels:
         application: 'interactive'
       stdin_open: true
       tty: true
       volumes:
         - ./data:/${MODEL_VOLUME_DIR}
-
-#  volumes:
-#    qdrant_volume:
-#    model_volume:

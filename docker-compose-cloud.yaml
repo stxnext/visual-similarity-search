@@ -8,6 +8,7 @@
         - "${QDRANT_PORT}:${QDRANT_PORT}"
       env_file:
         - .env-cloud
+        - .env
       volumes:
         - qdrant_volume:/${QDRANT_VOLUME_DIR}
     qdrant_preload-cloud:
@@ -17,6 +18,7 @@
       container_name: qdrant_preload-cloud
       env_file:
         - .env-cloud
+        - .env
       volumes:
         - qdrant_volume:/${QDRANT_PRELOAD_APP_NAME}/${QDRANT_VOLUME_DIR}
     interactive-cloud:
@@ -28,6 +30,7 @@
         - "${INTERACTIVE_PORT}:${INTERACTIVE_PORT}"
       env_file:
         - .env-cloud
+        - .env
       labels:
         application: 'interactive'
       stdin_open: true
