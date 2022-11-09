@@ -1,6 +1,11 @@
+import torch
+
 from enum import Enum
 
 from torchvision import transforms
+
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 SEARCH_RESPONSE_LIMIT = 20
 

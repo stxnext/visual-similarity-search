@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import argparse
+import torch
+
 from pathlib import Path
 from pprint import pprint
 
 import pytorch_metric_learning.utils.logging_presets as logging_presets
-import torch
-
-# import umap
 from pytorch_metric_learning import losses, miners, samplers, testers, trainers
 from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
 

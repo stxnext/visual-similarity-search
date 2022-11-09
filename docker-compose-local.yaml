@@ -15,6 +15,9 @@
       build:
         context: ./
         dockerfile: Dockerfile-interactive
+        args:
+            PYTHON_VERSION: python:${PYTHON_VERSION}
+            INTERACTIVE_APP_NAME: ${INTERACTIVE_APP_NAME}
       container_name: interactive-local
       ports:
         - "${INTERACTIVE_PORT}:${INTERACTIVE_PORT}"

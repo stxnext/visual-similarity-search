@@ -16,7 +16,7 @@ async def ping_check():
     return {"msg": "pong"}
 
 
-@router.post("/search/{collection_name}", response_model=List[SimilarityResponse])
+@router.post("/search/{collection_name}", response_model=list[SimilarityResponse])
 async def upload_file(
     request: Request,
     collection_name: MetricCollections,

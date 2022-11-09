@@ -43,7 +43,7 @@ Environment variables file for Docker-Compose is ***.env***. It contains a selec
   * `QDRANT_PORT` - port for Qdrant service,
   * `INTERACTIVE_PORT` - port for Streamlit service,
   * `QDRANT_VERSION` - version of Qdrant's docker image,
-  * `QDRANT_PRELOAD_APP_NAME` - name for the docker container preloading vector database in Qdrant,
+  * `PRELOAD_APP_NAME` - name for the docker container preloading vector database in Qdrant,
   * `QDRANT_VOLUME_DIR` - container's volume directory for Qdrant's storage,
   * `MODEL_VOLUME_DIR` - container's volume directory for local pull of models from cloud storage,
 

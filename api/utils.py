@@ -2,7 +2,7 @@ import os
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import IO, Dict, Iterator
+from typing import IO, Iterator
 
 from fastapi import UploadFile
 
@@ -10,7 +10,7 @@ from fastapi import UploadFile
 @contextmanager
 def create_named_temporary_files(
     **kwargs: UploadFile,
-) -> Iterator[Dict[str, IO[bytes]]]:
+) -> Iterator[dict[str, IO[bytes]]]:
     """
     Create dictionary containing reference to temporary files.
     Creating temporary files are slower than using byte-streams directly, but some

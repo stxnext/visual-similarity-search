@@ -11,20 +11,14 @@
         - .env
       volumes:
         - qdrant_volume:/${QDRANT_VOLUME_DIR}
-    qdrant_preload-cloud:
-      build:
-        context: ./
-        dockerfile: Dockerfile-qdrant-preload
-      container_name: qdrant_preload-cloud
-      env_file:
-        - .env-cloud
-        - .env
-      volumes:
-        - qdrant_volume:/${QDRANT_PRELOAD_APP_NAME}/${QDRANT_VOLUME_DIR}
     interactive-cloud:
       build:
         context: ./
         dockerfile: Dockerfile-interactive
+        args:
+            PYTHON_VERSION: python:${PYTHON_VERSION}
+            INTERACTIVE_APP_NAME: ${INTERACTIVE_APP_NAME}
+            PRELOAD_APP_NAME: ${PRELOAD_APP_NAME}
       container_name: interactive-cloud
       ports:
         - "${INTERACTIVE_PORT}:${INTERACTIVE_PORT}"
@@ -37,6 +31,8 @@
       tty: true
       volumes:
         - model_volume:/${MODEL_VOLUME_DIR}
+        - qdrant_volume:/${PRELOAD_APP_NAME}/${QDRANT_VOLUME_DIR}
+
 
   volumes:
     qdrant_volume:

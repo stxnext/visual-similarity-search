@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
-from functools import reduce
-from pathlib import Path
-from typing import Dict, List, Optional, Union
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torchvision.transforms as T
+
+from dataclasses import dataclass
+from functools import reduce
+from pathlib import Path
+from typing import Optional, Union
 from cycler import cycler
 from PIL import Image
+
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
 
@@ -24,8 +25,8 @@ class ImageDataset(Dataset):
 
     def __init__(
         self,
-        image_paths: List[str],
-        image_labels: List[int],
+        image_paths: list[str],
+        image_labels: list[int],
         transformation: Optional[T.Compose] = None,
     ):
         self.image_paths = image_paths
@@ -60,7 +61,7 @@ class DatasetCombined:
         cls,
         meta: Union[Path, str],
         data_dir: Union[Path, str],
-        transformation: Optional[Dict] = None,
+        transformation: Optional[dict] = None,
         split: float = 0.7,
     ) -> DatasetCombined:
         """Load meta csv, splits dataframe into train/test and create torch Dataset instances"""
@@ -69,7 +70,7 @@ class DatasetCombined:
             frac=1
         )  # shuffle dataframe just in case, because split is not class balanced (not guaranteed)
         # add data_dir path to meta file, so filenames will contain absolute path for data
-        df["file"] = df["file"].apply(lambda file: f"{data_dir}/{file}")
+        df["file"] = df["file"].apply(lambda file: str((data_dir / file).absolute()))
         x_train, x_test, y_train, y_test = train_test_split(
             np.array(df["file"]), np.array(df["label"]), train_size=split
         )
@@ -156,7 +157,7 @@ def get_transformation_with_size(size: int) -> T.Compose:
     )
 
 
-def save_training_meta(data: Dict, path: Optional[Path] = None) -> None:
+def save_training_meta(data: dict, path: Optional[Path] = None) -> None:
     """
     Save metadata json files into log dir to keep track of what args was passed to training cli,
     create meta.json for model loading.
@@ -173,5 +174,6 @@ def save_training_meta(data: Dict, path: Optional[Path] = None) -> None:
 
     with open(path / "meta.json", "w") as f:
         json.dump(
-            {"trunk": data["trunk"], "embedder_layers": data["embedder_layers"]}, f
+            {"trunk": data["trunk_model"], "embedder_layers": data["embedder_layers"]},
+            f,
         )

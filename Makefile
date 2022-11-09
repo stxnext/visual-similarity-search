@@ -20,7 +20,7 @@ run-clean: generate-req run-docker
 run-cloud-build:
 	docker-compose --file docker-compose-cloud.yaml --project-name "visual-similarity-search-cloud" \
 	up -d --no-deps --build ;\
-	sleep 30 ;\
+	sleep 900 ;\
 	docker-compose --file docker-compose-cloud.yaml --project-name "visual-similarity-search-cloud" \
 	restart qdrant-cloud ;\
 	sleep 10 ;\

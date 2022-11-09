@@ -1,9 +1,9 @@
 # Pull main environment
-ARG PYTHON_VERSION=3.8.10
-FROM python:$PYTHON_VERSION AS base
+ARG PYTHON_VERSION
+FROM ${PYTHON_VERSION}
 
 ENV PYTHONUNBUFFERED=1
-ENV DOCKER_ENTRYPOINT_FILE=docker-entrypoint-interactive.sh
+ENV DOCKER_ENTRYPOINT_FILE=scripts/docker-entrypoint-interactive.sh
 ENV APP_NAME=${INTERACTIVE_APP_NAME}
 
 # Define working directory
@@ -21,11 +21,15 @@ RUN pip install -r /$APP_NAME/requirements.txt
 ENV PATH /root/.local/bin:$PATH
 ENV PYTHONPATH "${PYTHONPATH}:/interactive"
 ENV PYTHONPATH "${PYTHONPATH}:/metrics"
+ENV PYTHONPATH "${PYTHONPATH}:/common"
+ENV PYTHONPATH "${PYTHONPATH}:/scripts"
 
 # Load files from repository
 COPY /api /$APP_NAME/api
 COPY /interactive /$APP_NAME/interactive
 COPY /metrics /$APP_NAME/metrics
+COPY /common /$APP_NAME/common
+COPY /scripts /$APP_NAME/scripts
 COPY /$DOCKER_ENTRYPOINT_FILE /$APP_NAME/$DOCKER_ENTRYPOINT_FILE
 
 RUN chmod +x /$APP_NAME/$DOCKER_ENTRYPOINT_FILE

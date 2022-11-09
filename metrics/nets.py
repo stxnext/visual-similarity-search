@@ -1,20 +1,12 @@
-import json
-import os
-from typing import Dict, List, Optional, Tuple, Union
-
 import torch
-from metrics.consts import METRIC_COLLECTION_NAMES
+
+from typing import Optional, Union
 from pytorch_metric_learning.utils.common_functions import Identity
 from torch import Tensor, nn
 from torchvision import models as pretrained_models
 
-from metrics import (
-    minio_client,
-    MINIO_BUCKET_NAME,
-    MINIO_MODELS_DIR,
-    DEVICE,
-    MODELS_DIR,
-)
+from common import env_function_handler
+from metrics.consts import METRIC_COLLECTION_NAMES, DEVICE
 from metrics.utils import rgetattr, rsetattr
 
 MODEL_TYPE = Union[nn.DataParallel, nn.Module]
@@ -32,7 +24,7 @@ class UnsupportedModel(Exception):
 
 def get_trunk(
     trunk_model_name: str,
-) -> Tuple[nn.Module, int]:
+) -> tuple[nn.Module, int]:
     """Return pretrained model from torchvision with identity function on last layer and size of last layer"""
     if trunk_model_name not in supported_trunk_models:
         raise UnsupportedModel(trunk_model_name)
@@ -51,11 +43,11 @@ class EmbeddingNN(nn.Module):
     Note: it's easier to wrap it as nn.Module instead of using just nn.Sequential, so it can be later modified.
     """
 
-    def __init__(self, layer_sizes: List[int], final_relu: bool = False):
+    def __init__(self, layer_sizes: list[int], final_relu: bool = False):
         super().__init__()
         self.net = self._create_net(layer_sizes, final_relu)
 
-    def _create_net(self, layer_sizes: List[int], final_relu: bool) -> nn.Sequential:
+    def _create_net(self, layer_sizes: list[int], final_relu: bool) -> nn.Sequential:
         """Create sequential neural network from layer sizes"""
         layers = []
         num_layers = len(layer_sizes)
@@ -74,10 +66,10 @@ class EmbeddingNN(nn.Module):
 
 def get_trunk_embedder(
     trunk_model_name: str,
-    layer_sizes: List[int],
+    layer_sizes: list[int],
     data_parallel: bool = True,
-    weights: Optional[Dict] = None,
-) -> Tuple[MODEL_TYPE, MODEL_TYPE]:
+    weights: Optional[dict] = None,
+) -> tuple[MODEL_TYPE, MODEL_TYPE]:
     """
     Return trunk and embedder models.
     If you want to load checkpoints for models provide a dictionary with keys 'trunk' and 'embedder' with
@@ -86,18 +78,7 @@ def get_trunk_embedder(
     trunk, trunk_output_size = get_trunk(trunk_model_name)
     embedder = EmbeddingNN([trunk_output_size] + layer_sizes).to(DEVICE)
     if weights:
-        if not os.path.exists(weights["trunk_local"]):
-            if os.getenv("TYPE") != "LOCAL":
-                minio_client.fget_object(
-                    MINIO_BUCKET_NAME, weights["trunk_minio"], weights["trunk_local"]
-                )
-        if not os.path.exists(weights["embedder_local"]):
-            if os.getenv("TYPE") != "LOCAL":
-                minio_client.fget_object(
-                    MINIO_BUCKET_NAME,
-                    weights["embedder_minio"],
-                    weights["embedder_local"],
-                )
+        env_function_handler.get_weights_datasets(weights=weights)
         trunk.load_state_dict(torch.load(weights["trunk_local"], map_location=DEVICE))
         embedder.load_state_dict(
             torch.load(weights["embedder_local"], map_location=DEVICE)
@@ -114,22 +95,8 @@ def get_full_pretrained_model(
     """Get full pretrained model with loaded weights"""
     if model_name not in METRIC_COLLECTION_NAMES:
         raise UnsupportedModel(model_name)
-    if os.getenv("TYPE") == "LOCAL":
-        with open(os.path.join(MODELS_DIR, model_name, "meta.json")) as f:
-            meta = json.load(f)
-    else:
-        meta = json.load(
-            minio_client.get_object(
-                bucket_name=MINIO_BUCKET_NAME,
-                object_name=os.path.join(MINIO_MODELS_DIR, model_name, "meta.json"),
-            )
-        )
-    weights = {
-        "trunk_minio": os.path.join(MINIO_MODELS_DIR, model_name, "trunk.pth"),
-        "embedder_minio": os.path.join(MINIO_MODELS_DIR, model_name, "embedder.pth"),
-        "trunk_local": os.path.join(MODELS_DIR, model_name, "trunk.pth"),
-        "embedder_local": os.path.join(MODELS_DIR, model_name, "embedder.pth"),
-    }
+    meta = env_function_handler.get_meta_json(model_name=model_name)
+    weights = env_function_handler.get_weights_dict(model_name=model_name)
     trunk, embedder = get_trunk_embedder(
         meta["trunk"], meta["embedder_layers"], data_parallel=False, weights=weights
     )
