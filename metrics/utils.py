@@ -131,18 +131,6 @@ def visualizer_hook(_, umap_embeddings, labels, split_name, keyname, *args):
     plt.show()
 
 
-def singleton(cls):
-    """Singleton implementation in form of decorator"""
-    instances = {}
-
-    def getinstance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-
-    return getinstance
-
-
 def get_transformation_with_size(size: int) -> T.Compose:
     """
     Create transformation pipeline of square resize,

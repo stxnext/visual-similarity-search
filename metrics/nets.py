@@ -5,7 +5,8 @@ from pytorch_metric_learning.utils.common_functions import Identity
 from torch import Tensor, nn
 from torchvision import models as pretrained_models
 
-from common import env_function_handler
+from common import env_handler
+
 from metrics.consts import METRIC_COLLECTION_NAMES, DEVICE
 from metrics.utils import rgetattr, rsetattr
 
@@ -78,7 +79,7 @@ def get_trunk_embedder(
     trunk, trunk_output_size = get_trunk(trunk_model_name)
     embedder = EmbeddingNN([trunk_output_size] + layer_sizes).to(DEVICE)
     if weights:
-        env_function_handler.get_weights_datasets(weights=weights)
+        env_handler.get_weights_datasets(weights=weights)
         trunk.load_state_dict(torch.load(weights["trunk_local"], map_location=DEVICE))
         embedder.load_state_dict(
             torch.load(weights["embedder_local"], map_location=DEVICE)
@@ -95,8 +96,8 @@ def get_full_pretrained_model(
     """Get full pretrained model with loaded weights"""
     if model_name not in METRIC_COLLECTION_NAMES:
         raise UnsupportedModel(model_name)
-    meta = env_function_handler.get_meta_json(model_name=model_name)
-    weights = env_function_handler.get_weights_dict(model_name=model_name)
+    meta = env_handler.get_meta_json(model_name=model_name)
+    weights = env_handler.get_weights_dict(model_name=model_name)
     trunk, embedder = get_trunk_embedder(
         meta["trunk"], meta["embedder_layers"], data_parallel=False, weights=weights
     )

@@ -1,4 +1,5 @@
-from pathlib import Path
+from common.global_utils import PROJECT_PATH
+
 
 LOGO_IMG_DIR = "interactive/assets/stxnext_web_color@1x.png"
 APP_TITLE = "Visual Similarity Search Engine"
@@ -14,7 +15,7 @@ CATEGORY_DESCR = {
         "source": "https://www.kaggle.com/datasets/aryashah2k/large-shoe-dataset-ut-zappos50k",
     },
 }
-EXAMPLE_PATH = Path(__file__).parent.parent / "interactive" / "examples"
+EXAMPLE_PATH = PROJECT_PATH / "interactive" / "examples"
 IMAGE_EXAMPLES = {
     "dogs": [
         {

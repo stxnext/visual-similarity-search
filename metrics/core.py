@@ -11,7 +11,7 @@ from qdrant_client.grpc import ScoredPoint
 from torchvision.transforms.transforms import Compose
 from tqdm.auto import tqdm
 
-from common import env_function_handler, qdrant_client
+from common import qdrant_client, env_handler
 
 from metrics.consts import (
     DEVICE,
@@ -22,7 +22,7 @@ from metrics.consts import (
     MetricCollections,
 )
 from metrics.nets import MODEL_TYPE, get_full_pretrained_model
-from metrics.utils import singleton
+from common.global_utils import singleton
 
 
 class InvalidCollectionName(Exception):
@@ -113,7 +113,7 @@ class MetricClient:
         if len(results_bench) > 0:
             imgs = [
                 RESIZE_TRANSFORM(img)
-                for img in env_function_handler.get_best_score_imgs(
+                for img in env_handler.get_best_score_imgs(
                     results=results_bench
                 )
             ]

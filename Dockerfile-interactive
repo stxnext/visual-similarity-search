@@ -14,8 +14,7 @@ ADD pyproject.toml /$APP_NAME/pyproject.toml
 
 RUN pip install --upgrade pip --no-input
 RUN pip install --no-cache-dir poetry
-RUN poetry export --without-hashes --format=requirements.txt > /$APP_NAME/requirements.txt
-RUN pip install -r /$APP_NAME/requirements.txt
+RUN poetry install
 
 # Update env variables
 ENV PATH /root/.local/bin:$PATH

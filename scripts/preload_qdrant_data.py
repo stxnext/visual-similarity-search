@@ -7,9 +7,8 @@ from loguru import logger
 from pathlib import PosixPath
 from distutils.dir_util import copy_tree
 
-from common import env_function_handler
+from common import env_handler
 from scripts import (
-    PRELOAD_APP_NAME,
     QDRANT_VOLUME_DIR,
     METRIC_COLLECTION_NAMES,
     MINIO_QDRANT_DATABASE_FILENAME,
@@ -36,8 +35,8 @@ def preload_and_unzip_qdrant_database(
     logger.info(f"Paths exist: {required_paths_exist}")
     if not all(required_paths_exist):
         logger.info("Start pulling data from MinIO")
-        env_function_handler.get_qdrant_database_file(
-            object_name=object_name, file_path=file_path
+        env_handler.get_qdrant_database_file(
+            object_name=str(object_name), file_path=str(file_path)
         )
         logger.info(f"Data pulled to the path: {file_path}")
 
@@ -63,7 +62,7 @@ def preload_and_unzip_qdrant_database(
 
 if __name__ == "__main__":
     logger.info("Process Started")
-    local_path = PRELOAD_APP_NAME / QDRANT_VOLUME_DIR
+    local_path = QDRANT_VOLUME_DIR
     file_path = local_path / MINIO_QDRANT_DATABASE_FILENAME
     object_name = (
         Path(os.getenv("MINIO_MAIN_PATH")) / "data" / MINIO_QDRANT_DATABASE_FILENAME

@@ -43,7 +43,7 @@ Environment variables file for Docker-Compose is ***.env***. It contains a selec
   * `QDRANT_PORT` - port for Qdrant service,
   * `INTERACTIVE_PORT` - port for Streamlit service,
   * `QDRANT_VERSION` - version of Qdrant's docker image,
-  * `PRELOAD_APP_NAME` - name for the docker container preloading vector database in Qdrant,
+  * `PYTHON_VERSION` - used Python version,
   * `QDRANT_VOLUME_DIR` - container's volume directory for Qdrant's storage,
   * `MODEL_VOLUME_DIR` - container's volume directory for local pull of models from cloud storage,
 
@@ -58,22 +58,25 @@ Environment variables file for Python processing is ***.env-local*** or ***.env-
 
 Apart from environmental variables, application uses contents of the dedicated `data` folder structure (available on the same level as ***.env*** file:
 ```angular2html
+api
+common
 data
 ├── metric_datasets
-│   ├── celebrities
 │   ├── dogs
 │   ├── shoes
 ├── models
-│   ├── celebrities
 │   ├── dogs
 │   └── shoes
 └── qdrant_storage
     ├── aliases
     ├── collections
-    │   ├── celebrities
     │   ├── dogs
     │   └── shoes
     └── collections_meta_wal
+interactive
+metrics
+notebooks
+scripts
 
 ```
 This structure is split as follows:
@@ -87,10 +90,15 @@ Installation using the terminal window:
 * Install ***git***, ***docker***, ***docker-compose*** and ***make*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/qdrant/qdrant_demo.git) (preferably use SSH cloning).
+* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1UeHYtgyewXmhDd3Qd-b2ud2u65a_kc3i/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained.
 * To install new environment execute one of the options below.
 ``` 
 # Use Makefile:
 make run-local-build 
+
+# Optional:
+make run-local-build-qdrant-restart
+make run-local-build-interactive-restart
 ```
 * Access the visual similarity search engine under URL: [localhost](http://0.0.0.0:8080).
 
@@ -108,8 +116,12 @@ Installation using the terminal window:
   * `TYPE=DEV` is preferred over TEST and PROD (option LOCAL does not work with cloud).
 * To install new environment execute one of the options below.
 ``` 
-# Use Makefile (may take up to 15 minutes):
+# Use Makefile - run one at the time:
 make run-cloud-build
+
+# Verify if run-cloud-build ended using logs in interactive-cloud container. Then, run the following two.
+make run-cloud-build-qdrant-restart
+make run-cloud-build-interactive-restart
 ```
 * Access the visual similarity search engine under URL: [localhost](http://0.0.0.0:8080).
 
@@ -185,12 +197,13 @@ Jupyter notebooks serve as a support during the development:
 * According to the Docker Image's documentation, Qdrant database works only on the Linux/AMD64 Os/Architecture.
 * ***faiss-cpu*** library is used instead of ***faiss*** due to the former being implemented for Python's version <=3.7 only.
 * A fixed version of Qdrant (v0.10.3) is being used due to its fast development and storage's versioning. Not only is a library being versioned, but collection structure does too. In consequence a collection built on Qdrant version 0.9.X is unreadable by version 0.10.X.
-* When running the code locally, outside docker-compose build an issue with Python modules visibility may occur. In that scenario run following commands in your terminal.
+* When running the code locally, outside docker-compose build an issue with Python modules visibility may occur. In that scenario set up you terminal directory to the `visual-similarity-search` folder and run following commands in your terminal.
 ```
 export PYTHONPATH="${PYTHONPATH}:/"
-export PYTHONPATH="${PYTHONPATH}:/metrics"
-export PYTHONPATH="${PYTHONPATH}:/interactive"
+export $(grep -v '^#' .env | xargs)
+export $(grep -v '^#' .env-local | xargs)
 ```
+* On first run of the Streamlit application, when running `Find Similar Images` button for the first time, models are being loaded to the library. This is one time event and will not influence a performance for next searches.
 
 
 ## Communication

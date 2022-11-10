@@ -8,7 +8,7 @@ from interactive import (
     CATEGORY_DESCR,
     IMAGE_EXAMPLES,
 )
-from common import env_function_handler
+from common import env_handler
 
 from metrics.consts import METRIC_COLLECTION_NAMES
 from metrics.core import MetricClient
@@ -18,10 +18,8 @@ class ModuleManager:
     """
     List of components used for building the app.
     """
-
     def __init__(self, states_manager):
         self.states_manager = states_manager
-        self.metric_client = MetricClient()
 
     @staticmethod
     def create_header():
@@ -117,7 +115,7 @@ class ModuleManager:
             (
                 st.session_state.random_captions,
                 st.session_state.random_imgs,
-            ) = env_function_handler.get_random_images_from_collection(
+            ) = env_handler.get_random_images_from_collection(
                 collection_name=st.session_state.category_option,
                 k=st.session_state.pull_random_img_number,
             )  # Pulls a sampled set of images from local/cloud storage
@@ -178,7 +176,7 @@ class ModuleManager:
         """
         Shows images in order of their similarity to the original input image.
         """
-        (anchor, similars,) = self.metric_client.get_best_choice_for_uploaded_image(
+        (anchor, similars,) = MetricClient().get_best_choice_for_uploaded_image(
             base_img=file,
             collection_name=collection,
             k=k,
