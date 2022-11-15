@@ -10,7 +10,7 @@ import torchvision.transforms as T
 from dataclasses import dataclass
 from functools import reduce
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Any
 from cycler import cycler
 from PIL import Image
 
@@ -28,15 +28,15 @@ class ImageDataset(Dataset):
         image_paths: list[str],
         image_labels: list[int],
         transformation: Optional[T.Compose] = None,
-    ):
+    ) -> None:
         self.image_paths = image_paths
         self.labels = image_labels
         self.transformation = transformation
 
-    def __len__(self):
+    def __len__(self) -> Any:
         return len(self.image_paths)
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> Any:
         image = self.image_paths[index]
         image = Image.open(image).convert("RGB")
         if self.transformation:
@@ -59,8 +59,8 @@ class DatasetCombined:
     @classmethod
     def get_dataset(
         cls,
-        meta: Union[Path, str],
-        data_dir: Union[Path, str],
+        meta: Path | str,
+        data_dir: Path | str,
         transformation: Optional[dict] = None,
         split: float = 0.7,
     ) -> DatasetCombined:
@@ -97,22 +97,22 @@ class DatasetCombined:
         )
 
 
-def rgetattr(obj, attr, *args):
+def rgetattr(obj, attr, *args) -> Any:
     """Nested attribute getter"""
 
-    def _getattr(obj, attr):
+    def _getattr(obj, attr) -> Any:
         return getattr(obj, attr, *args)
 
     return reduce(_getattr, [obj] + attr.split("."))
 
 
-def rsetattr(obj, attr, val):
+def rsetattr(obj, attr, val) -> Any:
     """Nested attribute setter"""
     pre, _, post = attr.rpartition(".")
     return setattr(rgetattr(obj, pre) if pre else obj, post, val)
 
 
-def visualizer_hook(_, umap_embeddings, labels, split_name, keyname, *args):
+def visualizer_hook(_, umap_embeddings, labels, split_name, keyname, *args) -> Any:
     """Hook used for vectors visualisation using umap, args determined by pml"""
     logging.info(
         "UMAP plot for the {} split and label set {}".format(split_name, keyname)

@@ -1,10 +1,8 @@
-from common.global_utils import PROJECT_PATH
+from common.consts import PROJECT_PATH
 
 
-LOGO_IMG_DIR = "interactive/assets/stxnext_web_color@1x.png"
-APP_TITLE = "Visual Similarity Search Engine"
 GRID_NROW_NUMBER = 3
-
+EXAMPLE_PATH = PROJECT_PATH / "interactive" / "examples"
 CATEGORY_DESCR = {
     "dogs": {
         "description": "Dogs - 120 breeds of dogs from around the world.",
@@ -15,7 +13,6 @@ CATEGORY_DESCR = {
         "source": "https://www.kaggle.com/datasets/aryashah2k/large-shoe-dataset-ut-zappos50k",
     },
 }
-EXAMPLE_PATH = PROJECT_PATH / "interactive" / "examples"
 IMAGE_EXAMPLES = {
     "dogs": [
         {

@@ -2,15 +2,14 @@ import streamlit as st
 
 from PIL import Image
 
+from common.consts import INTERACTIVE_ASSETS_DICT
 from interactive import (
-    APP_TITLE,
-    LOGO_IMG_DIR,
     CATEGORY_DESCR,
     IMAGE_EXAMPLES,
 )
 from common import env_handler
 
-from metrics.consts import METRIC_COLLECTION_NAMES
+from metrics.consts import MetricCollections
 from metrics.core import MetricClient
 
 
@@ -18,11 +17,12 @@ class ModuleManager:
     """
     List of components used for building the app.
     """
-    def __init__(self, states_manager):
-        self.states_manager = states_manager
 
-    @staticmethod
-    def create_header():
+    def __init__(self, states_manager) -> None:
+        self.states_manager = states_manager
+        self.metric_client = MetricClient()
+
+    def create_header(self) -> None:
         """
         Creates initial global formatting and a header structure.
         """
@@ -30,21 +30,13 @@ class ModuleManager:
         with col_logo_1:
             st.write("")
         with col_logo_2:
-            st.image(LOGO_IMG_DIR)
+            st.image(INTERACTIVE_ASSETS_DICT["logo_img_dir"])
         with col_logo_3:
             st.write("")
-        st.title(APP_TITLE)
-        st.write(
-            """ 
-                Returns a set number of images from a selected category. 
-                This set contains images with the highest degree of similarity to the uploaded/selected image.
-                Returned images are pulled from the local or cloud storage and similarity is calculated based on the vectors 
-                stored in the Qdrant database.
-                Algorithm uses image embeddings and deep neural networks to determine a value of cosine similarity metric.
-            """
-        )
+        st.title(INTERACTIVE_ASSETS_DICT["app_title"])
+        st.write(INTERACTIVE_ASSETS_DICT["app_first_paragraph"])
 
-    def create_main_filters(self):
+    def create_main_filters(self) -> None:
         """
         Adds initial header, reset all filers button, and category selection buttons.
         """
@@ -56,49 +48,50 @@ class ModuleManager:
             f'<p class="big-font">Which category would you like to search from?</p>',
             unsafe_allow_html=True,
         )  # header
-        for category in METRIC_COLLECTION_NAMES:
-            if st.button(CATEGORY_DESCR[category]["description"]):  # category buttons
-                st.session_state.category_desc_option = CATEGORY_DESCR[category][
+        for category_enum in MetricCollections:
+            if st.button(CATEGORY_DESCR[category_enum.value]["description"]):  # category buttons
+                st.session_state.category_desc_option = CATEGORY_DESCR[category_enum.value][
                     "description"
                 ]
-                st.session_state.category_option = category
+                st.session_state.category_option = category_enum
         st.write("")
 
-    @staticmethod
-    def create_image_provisioning_options(provisioning_options: list[str]):
+    def create_image_provisioning_options(
+        self, provisioning_options: list[str]
+    ) -> None:
         """
-        Adds list of image provisioning options that define following steps.
+        Creates a global state with a list of image provisioning options. This is done based on radio button input.
         """
-        if st.session_state.category_option is not None:
+        if st.session_state.category_option:
             st.session_state.provisioning_options = st.radio(
                 label="How would you like to add an image?",
                 options=tuple(provisioning_options),
             )
 
-    def create_image_provision_for_examples(self):
+    def create_image_provision_for_examples(self) -> None:
         """
         Resets state of previous provisioning selection and creates a category-specific list of image examples
         that a user can select from.
         """
         self.states_manager.reset_states_after_image_provisioning_list()
         st.session_state.example_captions = [
-            s_img["label"] for s_img in IMAGE_EXAMPLES[st.session_state.category_option]
+            s_img["label"] for s_img in IMAGE_EXAMPLES[st.session_state.category_option.value]
         ]  # get captions
         st.session_state.example_imgs = [
             Image.open(s_img["path"])
-            for s_img in IMAGE_EXAMPLES[st.session_state.category_option]
+            for s_img in IMAGE_EXAMPLES[st.session_state.category_option.value]
         ]  # get images
         example_images_zip = dict(
             zip(st.session_state.example_captions, st.session_state.example_imgs)
         )
         img_selection = st.selectbox(
-            f"Choose an image - {st.session_state.category_option}.",
+            f"Choose an image - {st.session_state.category_option.value}.",
             example_images_zip,
         )  # select image
         st.session_state.selected_img = example_images_zip[img_selection]
         st.session_state.show_input_img = True
 
-    def create_image_provision_for_random_storage_pull(self):
+    def create_image_provision_for_random_storage_pull(self) -> None:
         """
         Resets state of previous provisioning selection and pulls from local/cloud storage a category-specific list of
         image examples that a user can select from the list. Additionally, a button for re-running random selection is
@@ -106,7 +99,7 @@ class ModuleManager:
         """
         self.states_manager.reset_states_after_image_provisioning_list()
         st.session_state.pull_random_img_number = st.number_input(
-            label=f"Choose random images from {st.session_state.category_option} category.",
+            label=f"Choose random images from {st.session_state.category_option.value} category.",
             value=5,
             min_value=1,
             format="%i",
@@ -119,10 +112,7 @@ class ModuleManager:
                 collection_name=st.session_state.category_option,
                 k=st.session_state.pull_random_img_number,
             )  # Pulls a sampled set of images from local/cloud storage
-        if (
-            st.session_state.random_captions is not None
-            and st.session_state.random_imgs is not None
-        ):
+        if st.session_state.random_captions and st.session_state.random_imgs:
             random_images_zip = dict(
                 zip(
                     st.session_state.random_captions,
@@ -135,7 +125,7 @@ class ModuleManager:
             ]  # returns an image based on selection
             st.session_state.show_input_img = True
 
-    def create_image_provision_for_manual_upload(self):
+    def create_image_provision_for_manual_upload(self) -> None:
         """
         Resets state of previous provisioning selection and provides upload button for a user.
         Any RGB image can be uploaded.
@@ -143,11 +133,11 @@ class ModuleManager:
         self.states_manager.reset_states_after_image_provisioning_list()
         st.markdown(f'<p class="big-font">Choose a file.</p>', unsafe_allow_html=True)
         byte_img = st.file_uploader("Upload an image from a local disk.")
-        if byte_img is not None:
+        if byte_img:
             st.session_state.selected_img = Image.open(byte_img)
             st.session_state.show_input_img = True
 
-    def create_similarity_search_filters(self):
+    def create_similarity_search_filters(self) -> None:
         """
         Creates a set of similarity-search-specific filters - number of shown images an benchmark for
         minimum similarity value in %.
@@ -171,20 +161,20 @@ class ModuleManager:
             )
 
     def search_with_show(
-        self, collection: str, k: int, grid_nrow: int, benchmark: int, file
-    ):
+        self, collection_name: MetricCollections, k: int, grid_nrow: int, benchmark: int, file
+    ) -> None:
         """
         Shows images in order of their similarity to the original input image.
         """
-        (anchor, similars,) = MetricClient().get_best_choice_for_uploaded_image(
+        anchor, similars = self.metric_client.get_best_choice_for_uploaded_image(
             base_img=file,
-            collection_name=collection,
+            collection_name=collection_name,
             k=k,
             benchmark=benchmark,
         )
-        if similars is not None:
+        if similars:
             st.write(
-                f'Found {st.session_state.similar_img_number} images in the "{st.session_state.category_option}" category.'
+                f'Found {st.session_state.similar_img_number} images in the "{st.session_state.category_option.value}" category.'
             )
             st.write(
                 f"In the top left corner of every image a similarity coefficient is presented - it shows a level of similarity between a given image and an input image."
@@ -198,13 +188,13 @@ class ModuleManager:
         else:
             st.write(f"No images found for the similarity benchmark of {benchmark}%.")
 
-    def extract_similar_images(self):
+    def extract_similar_images(self) -> None:
         """
         Shows images in order of their similarity to the original input image.
         """
         self.search_with_show(
             file=st.session_state.selected_img,
-            collection=st.session_state.category_option,
+            collection_name=st.session_state.category_option,
             k=st.session_state.similar_img_number,
             grid_nrow=st.session_state.grid_nrow_number,
             benchmark=st.session_state.benchmark_similarity_value,

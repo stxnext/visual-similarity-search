@@ -1,16 +1,18 @@
 import torch
 
-from typing import Optional, Union
+from loguru import logger
+from typing import Optional
 from pytorch_metric_learning.utils.common_functions import Identity
 from torch import Tensor, nn
 from torchvision import models as pretrained_models
 
 from common import env_handler
 
-from metrics.consts import METRIC_COLLECTION_NAMES, DEVICE
+from metrics.consts import METRIC_COLLECTION_NAMES, DEVICE, MetricCollections
 from metrics.utils import rgetattr, rsetattr
+from common.utils import WeightsData
 
-MODEL_TYPE = Union[nn.DataParallel, nn.Module]
+MODEL_TYPE = nn.DataParallel | nn.Module
 
 # dictionary containing pretrained model names with name of last layer
 supported_trunk_models = {
@@ -44,7 +46,7 @@ class EmbeddingNN(nn.Module):
     Note: it's easier to wrap it as nn.Module instead of using just nn.Sequential, so it can be later modified.
     """
 
-    def __init__(self, layer_sizes: list[int], final_relu: bool = False):
+    def __init__(self, layer_sizes: list[int], final_relu: bool = False) -> None:
         super().__init__()
         self.net = self._create_net(layer_sizes, final_relu)
 
@@ -69,7 +71,8 @@ def get_trunk_embedder(
     trunk_model_name: str,
     layer_sizes: list[int],
     data_parallel: bool = True,
-    weights: Optional[dict] = None,
+    # weights: Optional[dict] = None,
+    weights: Optional[WeightsData] = None,
 ) -> tuple[MODEL_TYPE, MODEL_TYPE]:
     """
     Return trunk and embedder models.
@@ -79,10 +82,19 @@ def get_trunk_embedder(
     trunk, trunk_output_size = get_trunk(trunk_model_name)
     embedder = EmbeddingNN([trunk_output_size] + layer_sizes).to(DEVICE)
     if weights:
-        env_handler.get_weights_datasets(weights=weights)
-        trunk.load_state_dict(torch.load(weights["trunk_local"], map_location=DEVICE))
+        try:
+            env_handler.get_weights_datasets(weights=weights)
+        except:
+            logger.info(
+                "Embedder and Trunk are pulled only for Cloud environment. Download models manually."
+            )
+        # trunk.load_state_dict(torch.load(weights["trunk_local"], map_location=DEVICE))
+        # embedder.load_state_dict(
+        #     torch.load(weights["embedder_local"], map_location=DEVICE)
+        # )
+        trunk.load_state_dict(torch.load(weights.trunk_local, map_location=DEVICE))
         embedder.load_state_dict(
-            torch.load(weights["embedder_local"], map_location=DEVICE)
+            torch.load(weights.embedder_local, map_location=DEVICE)
         )
     if data_parallel:
         trunk = nn.DataParallel(trunk)
@@ -91,13 +103,13 @@ def get_trunk_embedder(
 
 
 def get_full_pretrained_model(
-    model_name: str, data_parallel: bool = True
+    collection_name: MetricCollections, data_parallel: bool = True
 ) -> MODEL_TYPE:
     """Get full pretrained model with loaded weights"""
-    if model_name not in METRIC_COLLECTION_NAMES:
-        raise UnsupportedModel(model_name)
-    meta = env_handler.get_meta_json(model_name=model_name)
-    weights = env_handler.get_weights_dict(model_name=model_name)
+    if collection_name.value not in METRIC_COLLECTION_NAMES:
+        raise UnsupportedModel(collection_name.value)
+    meta = env_handler.get_meta_json(collection_name=collection_name)
+    weights = WeightsData(collection_name=collection_name)
     trunk, embedder = get_trunk_embedder(
         meta["trunk"], meta["embedder_layers"], data_parallel=False, weights=weights
     )

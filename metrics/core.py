@@ -3,7 +3,6 @@ import torchvision
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
 from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
 
@@ -22,7 +21,7 @@ from metrics.consts import (
     MetricCollections,
 )
 from metrics.nets import MODEL_TYPE, get_full_pretrained_model
-from common.global_utils import singleton
+from common.utils import singleton
 
 
 class InvalidCollectionName(Exception):
@@ -34,7 +33,7 @@ class MetricModel:
     model: MODEL_TYPE
     transformation: Compose  # TODO: check if we can define it inside model meta.json files (serialize Compose)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.model.eval()
 
 
@@ -42,11 +41,11 @@ def init_all_metric_models() -> dict[str, MetricModel]:
     """Load all metrics models into memory and return in form of dict"""
     logger.info(f"Loading metric models: {METRIC_COLLECTION_NAMES}")
     return {
-        name: MetricModel(
-            model=get_full_pretrained_model(name, data_parallel=False),
+        collection_name.value: MetricModel(
+            model=get_full_pretrained_model(collection_name=collection_name, data_parallel=False),
             transformation=INFER_TRANSFORM,
         )
-        for name in tqdm(METRIC_COLLECTION_NAMES)
+        for collection_name in tqdm(MetricCollections)
     }
 
 
@@ -75,8 +74,8 @@ class MetricClient:
 
     def search(
         self,
-        img: Union[str, Path, Image.Image],
-        collection_name: Union[str, MetricCollections],
+        img: str | Path | Image.Image,
+        collection_name: str | MetricCollections,
         limit: int = SEARCH_RESPONSE_LIMIT,
     ) -> list[ScoredPoint]:
         """Search for most similar images (vectors) using qdrant engine"""
@@ -101,7 +100,7 @@ class MetricClient:
         return search_result
 
     def get_best_choice_for_uploaded_image(
-        self, base_img: Image.Image, collection_name: str, benchmark: int, k: int = 25
+        self, base_img: Image.Image, collection_name: MetricCollections, benchmark: int, k: int = 25
     ) -> tuple[Image.Image, list[Image.Image]]:
         """
         Search for similar images of random image from given collection.
@@ -113,9 +112,7 @@ class MetricClient:
         if len(results_bench) > 0:
             imgs = [
                 RESIZE_TRANSFORM(img)
-                for img in env_handler.get_best_score_imgs(
-                    results=results_bench
-                )
+                for img in env_handler.get_best_score_imgs(results=results_bench)
             ]
             to_image = torchvision.transforms.ToPILImage()
             imgs_transformed = [to_image(img) for img in imgs]

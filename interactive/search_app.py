@@ -6,7 +6,7 @@ from interactive.st_utils import StatesManager, WidgetManager
 from interactive.app_utils import ModuleManager
 
 
-def main_streamlit(module_manager: ModuleManager):
+def main_streamlit(module_manager: ModuleManager) -> None:
     """
     Main Streamlit application.
     """
@@ -31,7 +31,7 @@ def main_streamlit(module_manager: ModuleManager):
         logger.info(
             "Image Selection - only if st.session_state.category_option of main filters was chosen beforehand."
         )
-        if st.session_state.category_option is not None:
+        if st.session_state.category_option:
             if st.session_state.provisioning_options == provisioning_options[0]:
                 module_manager.create_image_provision_for_examples()
             elif st.session_state.provisioning_options == provisioning_options[1]:

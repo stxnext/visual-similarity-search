@@ -3,8 +3,10 @@ from __future__ import annotations
 import argparse
 import torch
 
+from argparse import Namespace
 from pathlib import Path
 from pprint import pprint
+from typing import Any
 
 import pytorch_metric_learning.utils.logging_presets as logging_presets
 from pytorch_metric_learning import losses, miners, samplers, testers, trainers
@@ -31,7 +33,7 @@ from metrics.utils import (
 
 
 # TODO: check if it wont be easier to load all data from json, rather that passing it to cli
-def parse_args():
+def parse_args() -> Namespace:
     parser = argparse.ArgumentParser(description="Process args for training")
     parser.add_argument("--data_dir", type=Path, nargs="?", help="Path for data dir")
     parser.add_argument(
@@ -102,7 +104,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
+def main() -> Any:
     # parse args and create logging directories
     args = parse_args()
     logs_dir = Path(args.name)

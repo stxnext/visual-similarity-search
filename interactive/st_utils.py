@@ -3,17 +3,15 @@ import streamlit as st
 from loguru import logger
 from interactive import GRID_NROW_NUMBER
 
+from common.consts import INTERACTIVE_ASSETS_DICT
+
 
 class StatesManager:
     """
     Class defining list of available application states.
     """
 
-    def __init__(self):
-        logger.info("Defining initial states within the application.")
-
-    @staticmethod
-    def initialize_states():
+    def initialize_states(self) -> None:
         """
         Initializes states within the application. Those are distinct for every user.
         The "if" condition is necessary for the app to not reset it's whole session_state.
@@ -49,8 +47,7 @@ class StatesManager:
             # Search Completed State - set after "Find Similar Images" is completed
             st.session_state.similar_images_found = None
 
-    @staticmethod
-    def reset_states_after_image_provisioning_list():
+    def reset_states_after_image_provisioning_list(self) -> None:
         """
         Reset all application states after radio selection for image provisioning.
         """
@@ -60,8 +57,7 @@ class StatesManager:
         st.session_state.similar_img_number = None
         st.session_state.similar_images_found = None
 
-    @staticmethod
-    def reset_all_states_button():
+    def reset_all_states_button(self) -> None:
         """
         Reset all application starting from category selection.
         """
@@ -80,36 +76,10 @@ class WidgetManager:
     Class for creating new Streamlit widgets and changing style of existing ones.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         logger.info("Setting up page layout.")
         st.set_page_config(layout="wide")
 
-    @staticmethod
-    def widget_formatting():
-        st.markdown(
-            f"""
-            <style>
-            .row-widget.stRadio > label {{
-                font-size: 18px;
-                font-weight: bold;
-            }}
-            .row-widget.stSelectbox > label {{
-                font-size: 18px;
-                font-weight: bold;
-            }}
-            .stNumberInput > label {{
-                font-size: 18px;
-                font-weight: bold;
-            }}
-            .stFileUploader > label {{
-                font-size: 18px;
-                font-weight: bold;
-            }}
-            .big-font {{
-                font-size:18px !important;
-                font-weight:bold; 
-            }}
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
+    def widget_formatting(self) -> None:
+        with open(INTERACTIVE_ASSETS_DICT["app_style_file"], "r") as f:
+            st.markdown(f"<style>{f.read}</style>", unsafe_allow_html=True)
