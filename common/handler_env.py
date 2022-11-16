@@ -34,7 +34,9 @@ class EnvFunctionHandler(ABC):
         """
 
     @abstractmethod
-    def get_meta_json(self, collection_name: MetricCollections) -> dict[str, list[int] | str]:
+    def get_meta_json(
+        self, collection_name: MetricCollections
+    ) -> dict[str, list[int] | str]:
         """
         Get meta.json dictionary created during model training from env storage.
         """

@@ -43,7 +43,9 @@ class LocalFunctionHandler(EnvFunctionHandler):
             )  # this result is loaded directly to the application state
         return captions_local_str, imgs_local
 
-    def get_meta_json(self, collection_name: MetricCollections) -> dict[str, list[int] | str]:
+    def get_meta_json(
+        self, collection_name: MetricCollections
+    ) -> dict[str, list[int] | str]:
         """
         Get meta.json dictionary created during model training from local storage.
         """

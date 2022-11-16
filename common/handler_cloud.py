@@ -9,7 +9,7 @@ from PIL import Image
 from qdrant_client.grpc import ScoredPoint
 
 from common.handler_env import EnvFunctionHandler
-from common.utils import singleton, WeightsData
+from common.utils import singleton, WeightsPathGenerator
 from common.consts import MINIO_BUCKET_NAME, MINIO_MAIN_PATH
 from metrics.consts import MetricCollections
 
@@ -17,18 +17,15 @@ from metrics.consts import MetricCollections
 @singleton
 class CloudFunctionHandler(EnvFunctionHandler):
     """
-    Managing class for local environment methods.
+    Managing class for cloud environment methods.
     """
 
     minio_data_dir = MINIO_MAIN_PATH / "data"
     minio_models_dir = minio_data_dir / "models"
     minio_metric_datasets_dir = minio_data_dir / "metric_datasets"
 
-    def _get_minio_client(self) -> Minio:
-        """
-        Initializes Minio client based on .env-cloud parameters.
-        """
-        return Minio(
+    def __init__(self):
+        self.minio_client = Minio(
             endpoint=os.getenv("MINIO_HOST"),
             access_key=os.getenv("MINIO_ACCESS_KEY"),
             secret_key=os.getenv("MINIO_SECRET_KEY"),
@@ -39,7 +36,7 @@ class CloudFunctionHandler(EnvFunctionHandler):
         """
         Pulls zipped Qdrant database snapshot from cloud's object_name to container's file_path.
         """
-        self._get_minio_client().fget_object(
+        self.minio_client.fget_object(
             bucket_name=MINIO_BUCKET_NAME,
             object_name=str(object_name),
             file_path=str(file_path),
@@ -51,10 +48,9 @@ class CloudFunctionHandler(EnvFunctionHandler):
         Additionally, filenames are returned as future captions in front-end module.
         """
         object_list = [MINIO_MAIN_PATH / r.payload["file"] for r in results]
-        minio_client = self._get_minio_client()
         return [
             Image.open(
-                minio_client.get_object(
+                self.minio_client.get_object(
                     bucket_name=MINIO_BUCKET_NAME, object_name=str(obj)
                 )
             )
@@ -69,8 +65,7 @@ class CloudFunctionHandler(EnvFunctionHandler):
         Used for image input suggestion in front-end component.
         Additionally, filenames are returned as captions.
         """
-        minio_client = self._get_minio_client()
-        objects = minio_client.list_objects(
+        objects = self.minio_client.list_objects(
             bucket_name=MINIO_BUCKET_NAME,
             prefix=f"{str(self.minio_metric_datasets_dir / collection_name.value)}/",  # lists objects in "SOME_PATH/"
         )
@@ -79,7 +74,7 @@ class CloudFunctionHandler(EnvFunctionHandler):
         captions_cloud = [obj.split("/")[-1] for obj in object_sample_list]
         imgs_cloud = [
             Image.open(
-                minio_client.get_object(
+                self.minio_client.get_object(
                     bucket_name=MINIO_BUCKET_NAME, object_name=str(obj)
                 )
             )
@@ -87,30 +82,33 @@ class CloudFunctionHandler(EnvFunctionHandler):
         ]
         return captions_cloud, imgs_cloud
 
-    def get_meta_json(self, collection_name: MetricCollections) -> dict[str, list[int] | str]:
+    def get_meta_json(
+        self, collection_name: MetricCollections
+    ) -> dict[str, list[int] | str]:
         """
         Get meta.json dictionary created during model training from cloud storage.
         """
         return json.load(
-            self._get_minio_client().get_object(
+            self.minio_client.get_object(
                 bucket_name=MINIO_BUCKET_NAME,
-                object_name=str(self.minio_models_dir / collection_name.value / "meta.json"),
+                object_name=str(
+                    self.minio_models_dir / collection_name.value / "meta.json"
+                ),
             )
         )
 
-    def get_weights_datasets(self, weights: WeightsData) -> None:
+    def get_weights_datasets(self, weights: WeightsPathGenerator) -> None:
         """
         Pull embedder and trunk files to the container from cloud storage. Empty for local.
         """
-        minio_client = self._get_minio_client()
         if not weights.trunk_local.is_file():
-            minio_client.fget_object(
+            self.minio_client.fget_object(
                 bucket_name=MINIO_BUCKET_NAME,
                 object_name=str(weights.trunk_minio),
                 file_path=str(weights.trunk_local),
             )
         if not weights.embedder_local.is_file():
-            minio_client.fget_object(
+            self.minio_client.fget_object(
                 bucket_name=MINIO_BUCKET_NAME,
                 object_name=str(weights.embedder_minio),
                 file_path=str(weights.embedder_local),

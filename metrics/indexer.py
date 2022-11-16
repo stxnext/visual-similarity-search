@@ -50,14 +50,18 @@ def upload_indexes(
 ) -> None:
     """Helper function for creating embeddings and uploading them to qdrant"""
     logger.info(f"Loading model: {collection_name.value}")
-    model = get_full_pretrained_model(collection_name=collection_name, data_parallel=False)
+    model = get_full_pretrained_model(
+        collection_name=collection_name, data_parallel=False
+    )
     model.eval()
     dataset = DatasetCombined.get_dataset(meta_file, dataset_dir)
     embeddings = []
     meta_data = []
     df = dataset.df
     df = df.fillna("")  # JSON does not support np.nan and pd.NaN
-    logger.info(f"Started indexing {len(df)} vectors for collection {collection_name.value}")
+    logger.info(
+        f"Started indexing {len(df)} vectors for collection {collection_name.value}"
+    )
     for i, row in tqdm(df.iterrows(), total=df.shape[0]):
         img = INFER_TRANSFORM(Image.open(row["file"]).convert("RGB"))
         with torch.no_grad():

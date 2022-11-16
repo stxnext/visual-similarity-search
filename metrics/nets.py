@@ -10,7 +10,7 @@ from common import env_handler
 
 from metrics.consts import METRIC_COLLECTION_NAMES, DEVICE, MetricCollections
 from metrics.utils import rgetattr, rsetattr
-from common.utils import WeightsData
+from common.utils import WeightsPathGenerator
 
 MODEL_TYPE = nn.DataParallel | nn.Module
 
@@ -71,8 +71,7 @@ def get_trunk_embedder(
     trunk_model_name: str,
     layer_sizes: list[int],
     data_parallel: bool = True,
-    # weights: Optional[dict] = None,
-    weights: Optional[WeightsData] = None,
+    weights: Optional[WeightsPathGenerator] = None,
 ) -> tuple[MODEL_TYPE, MODEL_TYPE]:
     """
     Return trunk and embedder models.
@@ -88,10 +87,6 @@ def get_trunk_embedder(
             logger.info(
                 "Embedder and Trunk are pulled only for Cloud environment. Download models manually."
             )
-        # trunk.load_state_dict(torch.load(weights["trunk_local"], map_location=DEVICE))
-        # embedder.load_state_dict(
-        #     torch.load(weights["embedder_local"], map_location=DEVICE)
-        # )
         trunk.load_state_dict(torch.load(weights.trunk_local, map_location=DEVICE))
         embedder.load_state_dict(
             torch.load(weights.embedder_local, map_location=DEVICE)
@@ -109,7 +104,7 @@ def get_full_pretrained_model(
     if collection_name.value not in METRIC_COLLECTION_NAMES:
         raise UnsupportedModel(collection_name.value)
     meta = env_handler.get_meta_json(collection_name=collection_name)
-    weights = WeightsData(collection_name=collection_name)
+    weights = WeightsPathGenerator(collection_name=collection_name)
     trunk, embedder = get_trunk_embedder(
         meta["trunk"], meta["embedder_layers"], data_parallel=False, weights=weights
     )

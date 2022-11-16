@@ -1,5 +1,4 @@
 from typing import Any
-from dataclasses import dataclass
 from pathlib import Path
 
 from common.consts import MINIO_MAIN_PATH, PROJECT_PATH
@@ -18,37 +17,30 @@ def singleton(cls) -> Any:
     return getinstance
 
 
-def create_weights_path(prefix: Path, collection_name: MetricCollections, suffix: str) -> Path:
-    return prefix / "data" / "models" / collection_name.value / suffix
+class WeightsPathGenerator:
+    """Class used for generating weight/model file paths based on the collection's name."""
 
+    def __init__(self, collection_name: MetricCollections):
+        self.collection_name_value = collection_name.value
 
-@dataclass
-class WeightsData:
-    """Dto containing all dataset information"""
-    collection_name: MetricCollections
-    trunk_minio: Path = MINIO_MAIN_PATH
-    embedder_minio: Path = MINIO_MAIN_PATH
-    trunk_local: Path = PROJECT_PATH
-    embedder_local: Path = PROJECT_PATH
+    def create_weights_path(self, prefix: Path, suffix: str) -> Path:
+        """
+        Create collection/model specific paths to files containing weights and models.
+        """
+        return prefix / "data" / "models" / self.collection_name_value / suffix
 
-    def __post_init__(self) -> None:
-        self.trunk_minio = create_weights_path(
-            prefix=self.trunk_minio,
-            collection_name=self.collection_name,
-            suffix="trunk.pth"
-        )
-        self.embedder_minio = create_weights_path(
-            prefix=self.embedder_minio,
-            collection_name=self.collection_name,
-            suffix="embedder.pth"
-        )
-        self.trunk_local = create_weights_path(
-            prefix=self.trunk_local,
-            collection_name=self.collection_name,
-            suffix="trunk.pth"
-        )
-        self.embedder_local = create_weights_path(
-            prefix=self.embedder_local,
-            collection_name=self.collection_name,
-            suffix="embedder.pth"
-        )
+    @property
+    def trunk_minio(self):
+        return self.create_weights_path(prefix=MINIO_MAIN_PATH, suffix="trunk.pth")
+
+    @property
+    def embedder_minio(self):
+        return self.create_weights_path(prefix=MINIO_MAIN_PATH, suffix="embedder.pth")
+
+    @property
+    def trunk_local(self):
+        return self.create_weights_path(prefix=PROJECT_PATH, suffix="trunk.pth")
+
+    @property
+    def embedder_local(self):
+        return self.create_weights_path(prefix=PROJECT_PATH, suffix="embedder.pth")

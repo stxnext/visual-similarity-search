@@ -42,7 +42,9 @@ def init_all_metric_models() -> dict[str, MetricModel]:
     logger.info(f"Loading metric models: {METRIC_COLLECTION_NAMES}")
     return {
         collection_name.value: MetricModel(
-            model=get_full_pretrained_model(collection_name=collection_name, data_parallel=False),
+            model=get_full_pretrained_model(
+                collection_name=collection_name, data_parallel=False
+            ),
             transformation=INFER_TRANSFORM,
         )
         for collection_name in tqdm(MetricCollections)
@@ -100,7 +102,11 @@ class MetricClient:
         return search_result
 
     def get_best_choice_for_uploaded_image(
-        self, base_img: Image.Image, collection_name: MetricCollections, benchmark: int, k: int = 25
+        self,
+        base_img: Image.Image,
+        collection_name: MetricCollections,
+        benchmark: int,
+        k: int = 25,
     ) -> tuple[Image.Image, list[Image.Image]]:
         """
         Search for similar images of random image from given collection.

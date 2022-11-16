@@ -24,6 +24,9 @@ class ModuleManager:
         self.metric_client = MetricClient()
 
     def widget_formatting(self) -> None:
+        """
+        Defines Streamlit widget styles based on the input provided by style.css file.
+        """
         with open(INTERACTIVE_ASSETS_DICT["app_style_file"], "r") as f:
             st.markdown(f"<style>{f.read}</style>", unsafe_allow_html=True)
 
@@ -113,10 +116,12 @@ class ModuleManager:
             unsafe_allow_html=True,
         )  # header
         for category_enum in MetricCollections:
-            if st.button(CATEGORY_DESCR[category_enum.value]["description"]):  # category buttons
-                st.session_state.category_desc_option = CATEGORY_DESCR[category_enum.value][
-                    "description"
-                ]
+            if st.button(
+                CATEGORY_DESCR[category_enum.value]["description"]
+            ):  # category buttons
+                st.session_state.category_desc_option = CATEGORY_DESCR[
+                    category_enum.value
+                ]["description"]
                 st.session_state.category_option = category_enum
         st.write("")
 
@@ -139,7 +144,8 @@ class ModuleManager:
         """
         self.reset_states_after_image_provisioning_list()
         st.session_state.example_captions = [
-            s_img["label"] for s_img in IMAGE_EXAMPLES[st.session_state.category_option.value]
+            s_img["label"]
+            for s_img in IMAGE_EXAMPLES[st.session_state.category_option.value]
         ]  # get captions
         st.session_state.example_imgs = [
             Image.open(s_img["path"])
@@ -225,7 +231,12 @@ class ModuleManager:
             )
 
     def search_with_show(
-        self, collection_name: MetricCollections, k: int, grid_nrow: int, benchmark: int, file
+        self,
+        collection_name: MetricCollections,
+        k: int,
+        grid_nrow: int,
+        benchmark: int,
+        file,
     ) -> None:
         """
         Shows images in order of their similarity to the original input image.
@@ -266,7 +277,6 @@ class ModuleManager:
 
         if st.button("Reset Images"):
             self.reset_all_states_button()
-
 
     def run_app(self):
         logger.info("Set main graphical options.")
