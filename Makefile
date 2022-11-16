@@ -15,13 +15,28 @@ format:	flake black isort mypy # run all formatters at once
 generate-req:
 	poetry export --without-hashes --format=requirements.txt > requirements.txt
 
-build-dockers:
-	docker-compose build
-
-run-docker:
-	docker-compose -f docker-compose.yaml up
-
-run-local:
-	poetry run uvicorn app.main:app --proxy-headers --host 0.0.0.0 --port 8000
-
 run-clean: generate-req run-docker
+
+run-cloud-build:
+	docker-compose --file docker-compose-cloud.yaml --project-name "visual-similarity-search-cloud" \
+	up -d --no-deps --build
+
+run-cloud-build-qdrant-restart:
+	docker-compose --file docker-compose-cloud.yaml --project-name "visual-similarity-search-cloud" \
+	restart qdrant-cloud
+
+run-cloud-build-interactive-restart:
+	docker-compose --file docker-compose-cloud.yaml --project-name "visual-similarity-search-cloud" \
+	restart interactive-cloud
+
+run-local-build:
+	docker-compose --file docker-compose-local.yaml --project-name "visual-similarity-search-local" \
+	up -d --no-deps --build ;\
+
+run-local-build-qdrant-restart:
+	docker-compose --file docker-compose-local.yaml --project-name "visual-similarity-search-local" \
+	restart qdrant-local
+
+run-local-build-interactive-restart:
+	docker-compose --file docker-compose-local.yaml --project-name "visual-similarity-search-local" \
+	restart interactive-local

@@ -1,0 +1,20 @@
+.row-widget.stRadio > label {
+    font-size: 18px;
+    font-weight: bold;
+}
+.row-widget.stSelectbox > label {
+    font-size: 18px;
+    font-weight: bold;
+}
+.stNumberInput > label {
+    font-size: 18px;
+    font-weight: bold;
+}
+.stFileUploader > label {
+    font-size: 18px;
+    font-weight: bold;
+}
+.big-font {
+    font-size:18px !important;
+    font-weight:bold;
+}

@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
-from functools import reduce
-from pathlib import Path
-from typing import Dict, List, Optional, Union
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torchvision.transforms as T
+
+from dataclasses import dataclass
+from functools import reduce
+from pathlib import Path
+from typing import Optional, Any
 from cycler import cycler
 from PIL import Image
+
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
 
@@ -24,18 +25,18 @@ class ImageDataset(Dataset):
 
     def __init__(
         self,
-        image_paths: List[str],
-        image_labels: List[int],
+        image_paths: list[str],
+        image_labels: list[int],
         transformation: Optional[T.Compose] = None,
-    ):
+    ) -> None:
         self.image_paths = image_paths
         self.labels = image_labels
         self.transformation = transformation
 
-    def __len__(self):
+    def __len__(self) -> Any:
         return len(self.image_paths)
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> Any:
         image = self.image_paths[index]
         image = Image.open(image).convert("RGB")
         if self.transformation:
@@ -58,9 +59,9 @@ class DatasetCombined:
     @classmethod
     def get_dataset(
         cls,
-        meta: Union[Path, str],
-        data_dir: Union[Path, str],
-        transformation: Optional[Dict] = None,
+        meta: Path | str,
+        data_dir: Path | str,
+        transformation: Optional[dict] = None,
         split: float = 0.7,
     ) -> DatasetCombined:
         """Load meta csv, splits dataframe into train/test and create torch Dataset instances"""
@@ -96,22 +97,22 @@ class DatasetCombined:
         )
 
 
-def rgetattr(obj, attr, *args):
+def rgetattr(obj, attr, *args) -> Any:
     """Nested attribute getter"""
 
-    def _getattr(obj, attr):
+    def _getattr(obj, attr) -> Any:
         return getattr(obj, attr, *args)
 
     return reduce(_getattr, [obj] + attr.split("."))
 
 
-def rsetattr(obj, attr, val):
+def rsetattr(obj, attr, val) -> Any:
     """Nested attribute setter"""
     pre, _, post = attr.rpartition(".")
     return setattr(rgetattr(obj, pre) if pre else obj, post, val)
 
 
-def visualizer_hook(_, umap_embeddings, labels, split_name, keyname, *args):
+def visualizer_hook(_, umap_embeddings, labels, split_name, keyname, *args) -> Any:
     """Hook used for vectors visualisation using umap, args determined by pml"""
     logging.info(
         "UMAP plot for the {} split and label set {}".format(split_name, keyname)
@@ -130,18 +131,6 @@ def visualizer_hook(_, umap_embeddings, labels, split_name, keyname, *args):
     plt.show()
 
 
-def singleton(cls):
-    """Singleton implementation in form of decorator"""
-    instances = {}
-
-    def getinstance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-
-    return getinstance
-
-
 def get_transformation_with_size(size: int) -> T.Compose:
     """
     Create transformation pipeline of square resize,
@@ -156,7 +145,7 @@ def get_transformation_with_size(size: int) -> T.Compose:
     )
 
 
-def save_training_meta(data: Dict, path: Optional[Path] = None) -> None:
+def save_training_meta(data: dict, path: Optional[Path] = None) -> None:
     """
     Save metadata json files into log dir to keep track of what args was passed to training cli,
     create meta.json for model loading.
@@ -173,5 +162,6 @@ def save_training_meta(data: Dict, path: Optional[Path] = None) -> None:
 
     with open(path / "meta.json", "w") as f:
         json.dump(
-            {"trunk": data["trunk"], "embedder_layers": data["embedder_layers"]}, f
+            {"trunk": data["trunk_model"], "embedder_layers": data["embedder_layers"]},
+            f,
         )

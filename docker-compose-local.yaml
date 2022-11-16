@@ -1,0 +1,32 @@
+  version: '3.7'
+
+  services:
+    qdrant-local:
+      image: qdrant/qdrant:${QDRANT_VERSION}
+      container_name: qdrant-local
+      ports:
+        - "${QDRANT_PORT}:${QDRANT_PORT}"
+      env_file:
+        - .env-local
+        - .env
+      volumes:
+        - ./data/qdrant_storage:/${QDRANT_VOLUME_DIR}
+    interactive-local:
+      build:
+        context: ./
+        dockerfile: Dockerfile-interactive
+        args:
+            PYTHON_VERSION: python:${PYTHON_VERSION}
+            INTERACTIVE_APP_NAME: ${INTERACTIVE_APP_NAME}
+      container_name: interactive-local
+      ports:
+        - "${INTERACTIVE_PORT}:${INTERACTIVE_PORT}"
+      env_file:
+        - .env-local
+        - .env
+      labels:
+        application: 'interactive'
+      stdin_open: true
+      tty: true
+      volumes:
+        - ./data:/${MODEL_VOLUME_DIR}

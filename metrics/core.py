@@ -1,20 +1,19 @@
-import random
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Dict, List, Tuple, Union
-
 import torch
 import torchvision
+
+from dataclasses import dataclass
+from pathlib import Path
 from loguru import logger
-from PIL import Image
-from qdrant_client import QdrantClient
+from PIL import Image, ImageDraw, ImageFont
+
 from qdrant_client.grpc import ScoredPoint
 from torchvision.transforms.transforms import Compose
-from torchvision.utils import make_grid
 from tqdm.auto import tqdm
 
-from metrics import DEVICE, METRIC_TYPES_DIR, qdrant_client
+from common import qdrant_client, env_handler
+
 from metrics.consts import (
+    DEVICE,
     INFER_TRANSFORM,
     METRIC_COLLECTION_NAMES,
     RESIZE_TRANSFORM,
@@ -22,7 +21,7 @@ from metrics.consts import (
     MetricCollections,
 )
 from metrics.nets import MODEL_TYPE, get_full_pretrained_model
-from metrics.utils import singleton
+from common.utils import singleton
 
 
 class InvalidCollectionName(Exception):
@@ -34,19 +33,21 @@ class MetricModel:
     model: MODEL_TYPE
     transformation: Compose  # TODO: check if we can define it inside model meta.json files (serialize Compose)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.model.eval()
 
 
-def init_all_metric_models() -> Dict[str, MetricModel]:
+def init_all_metric_models() -> dict[str, MetricModel]:
     """Load all metrics models into memory and return in form of dict"""
     logger.info(f"Loading metric models: {METRIC_COLLECTION_NAMES}")
     return {
-        name: MetricModel(
-            model=get_full_pretrained_model(name, data_parallel=False),
+        collection_name.value: MetricModel(
+            model=get_full_pretrained_model(
+                collection_name=collection_name, data_parallel=False
+            ),
             transformation=INFER_TRANSFORM,
         )
-        for name in tqdm(METRIC_COLLECTION_NAMES)
+        for collection_name in tqdm(MetricCollections)
     }
 
 
@@ -55,11 +56,10 @@ class MetricClient:
     """Main client written as a simple bridge between metric search and api"""
 
     def __init__(self, device_name: str = DEVICE) -> None:
-        self.qdrant_client: QdrantClient = qdrant_client
         self.models = init_all_metric_models()
         self.device = device_name
 
-    def _single_img_infer(self, model: MetricModel, img: Image.Image) -> List[float]:
+    def _single_img_infer(self, model: MetricModel, img: Image.Image) -> list[float]:
         """Perform single inference of image with proper model and return embeddings"""
         img = model.transformation(img)
         model = model.model
@@ -76,12 +76,11 @@ class MetricClient:
 
     def search(
         self,
-        img: Union[str, Path, Image.Image],
-        collection_name: Union[str, MetricCollections],
+        img: str | Path | Image.Image,
+        collection_name: str | MetricCollections,
         limit: int = SEARCH_RESPONSE_LIMIT,
-    ) -> List[ScoredPoint]:
+    ) -> list[ScoredPoint]:
         """Search for most similar images (vectors) using qdrant engine"""
-
         if isinstance(collection_name, MetricCollections):
             collection_name = collection_name.value
         if collection_name not in METRIC_COLLECTION_NAMES:
@@ -94,7 +93,7 @@ class MetricClient:
         model = self.models[collection_name]
         embedding = self._single_img_infer(model, img)
 
-        search_result = self.qdrant_client.search(
+        search_result = qdrant_client.search(
             collection_name=collection_name,
             query_vector=embedding,
             query_filter=None,  # TODO: add filtering feature
@@ -102,19 +101,37 @@ class MetricClient:
         )
         return search_result
 
-    def _get_random_similar_images(
-        self, collection_name: str, k: int = 25
-    ) -> Tuple[Image.Image, Image.Image]:
+    def get_best_choice_for_uploaded_image(
+        self,
+        base_img: Image.Image,
+        collection_name: MetricCollections,
+        benchmark: int,
+        k: int = 25,
+    ) -> tuple[Image.Image, list[Image.Image]]:
         """
         Search for similar images of random image from given collection.
-        Returns tuple of images [anchor_image, grid image of k most similar images (the biggest cosine similarity)
-        # TODO: probably going to be removed as it is only helper method
+        Returns tuple of images [anchor_image, grid image of k most similar images (the biggest cosine similarity)]
         """
-        ds_path = METRIC_TYPES_DIR / collection_name
-        file = random.choice(list(ds_path.iterdir()))
-        img = Image.open(file)
-        results = self.search(img, collection_name, limit=k)
-        imgs = [RESIZE_TRANSFORM(Image.open(r.payload["file"])) for r in results]
-        grid = make_grid(imgs)
-        grid_img = torchvision.transforms.ToPILImage()(grid)
-        return img, grid_img
+        results = self.search(base_img, collection_name, limit=k)
+        results_bench = [r for r in results if round(r.score, 4) >= benchmark / 100]
+        scores_bench = [100 * round(r.score, 4) for r in results_bench]
+        if len(results_bench) > 0:
+            imgs = [
+                RESIZE_TRANSFORM(img)
+                for img in env_handler.get_best_score_imgs(results=results_bench)
+            ]
+            to_image = torchvision.transforms.ToPILImage()
+            imgs_transformed = [to_image(img) for img in imgs]
+
+            # Adding similarity scores to the images with best
+            for i, img in enumerate(imgs_transformed):
+                draw = ImageDraw.Draw(img)
+                draw.text(
+                    xy=(10, 10),
+                    text="{0:.2f}%".format(scores_bench[i]),
+                    font=ImageFont.truetype("DejaVuSans-Bold.ttf", 40),
+                    fill=(0, 255, 0),
+                )
+        else:
+            imgs_transformed = None
+        return base_img, imgs_transformed

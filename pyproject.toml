@@ -2,12 +2,12 @@
 name = "metrics"
 version = "0.1.0"
 description = ""
-authors = ["Szymon Idziniak <szymon.idziniak@stxnext.pl>"]
+authors = ["Szymon Idziniak <szymon.idziniak@stxnext.pl>", "Bartosz Mielczarek <bartosz.mielczarek@stxnext.pl>"]
 
 # TODO: add torch into poetry dependencies,
 # so it will be easier to build container just with requirements.txt dump from poetry
 [tool.poetry.dependencies]
-python = "3.8.10"
+python = "^3.10.8"
 scipy = "^1.9.0"
 tensorboard = "^2.9.1"
 umap-learn = "^0.5.3"
@@ -15,7 +15,7 @@ matplotlib = "^3.5.2"
 Pillow = "^9.2.0"
 scikit-learn = "^1.1.2"
 timm = "^0.6.7"
-qdrant-client = "^0.9.7"
+qdrant-client = "^0.10"
 autoflake = "^1.5.3"
 uvicorn = {extras = ["standard"], version = "^0.18.3"}
 fastapi = {extras = ["uvicorn"], version = "^0.81.0"}
@@ -25,6 +25,11 @@ python-multipart = "^0.0.5"
 Jinja2 = "^3.1.2"
 fastapi-utils = "^0.2.1"
 record-keeper = "^0.9.32"
+loguru = "^0.6.0"
+streamlit = "^1.13.0"
+minio = "^7.1.12"
+streamlit-image-select = "^0.2.0"
+faiss-cpu = "^1.7.2"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"

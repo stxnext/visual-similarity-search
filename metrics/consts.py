@@ -1,12 +1,17 @@
+import torch
+
 from enum import Enum
 
 from torchvision import transforms
+
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 SEARCH_RESPONSE_LIMIT = 20
 
 DEFAULT_SPLIT = 0.7
 DEFAULT_BATCH_SIZE = 8
-DEFAULT_EPOCHS = 16
+DEFAULT_EPOCHS = 10
 DEFAULT_LR = 0.00001
 DEFAULT_WEIGHT_DECAY = 0.0001
 DEFAULT_SAMPLER_M = 2

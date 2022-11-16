@@ -1,0 +1,39 @@
+# Pull main environment
+ARG PYTHON_VERSION
+FROM ${PYTHON_VERSION}
+
+ENV PYTHONUNBUFFERED=1
+ENV DOCKER_ENTRYPOINT_FILE=scripts/docker-entrypoint-interactive.sh
+ENV APP_NAME=${INTERACTIVE_APP_NAME}
+
+# Define working directory
+WORKDIR /$APP_NAME
+
+ADD poetry.lock /$APP_NAME/poetry.lock
+ADD pyproject.toml /$APP_NAME/pyproject.toml
+
+RUN pip install --upgrade pip --no-input
+RUN pip install --no-cache-dir poetry
+RUN poetry install
+
+# Update env variables
+ENV PATH /root/.local/bin:$PATH
+ENV PYTHONPATH "${PYTHONPATH}:/interactive"
+ENV PYTHONPATH "${PYTHONPATH}:/metrics"
+ENV PYTHONPATH "${PYTHONPATH}:/common"
+ENV PYTHONPATH "${PYTHONPATH}:/scripts"
+
+# Load files from repository
+COPY /api /$APP_NAME/api
+COPY /interactive /$APP_NAME/interactive
+COPY /metrics /$APP_NAME/metrics
+COPY /common /$APP_NAME/common
+COPY /scripts /$APP_NAME/scripts
+COPY /$DOCKER_ENTRYPOINT_FILE /$APP_NAME/$DOCKER_ENTRYPOINT_FILE
+
+RUN chmod +x /$APP_NAME/$DOCKER_ENTRYPOINT_FILE
+
+# Expose port and run command in shell file
+EXPOSE 8080
+
+CMD /$APP_NAME/$DOCKER_ENTRYPOINT_FILE
