@@ -1,7 +1,5 @@
 import os
-
 from pathlib import Path
-
 
 PROJECT_PATH = Path(__file__).parent.parent
 MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME")
@@ -17,4 +15,5 @@ INTERACTIVE_ASSETS_DICT = {
             stored in the Qdrant database.
             Algorithm uses image embeddings and deep neural networks to determine a value of cosine similarity metric.
         """,
+    "github_link": "https://github.com/stxnext/visual-similarity-search",
 }

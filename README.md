@@ -42,10 +42,11 @@ and second for working of Python app.
 Environment variables file for Docker-Compose is ***.env***. It contains a selection of variables:
   * `QDRANT_PORT` - port for Qdrant service,
   * `INTERACTIVE_PORT` - port for Streamlit service,
-  * `QDRANT_VERSION` - version of Qdrant's docker image,
   * `PYTHON_VERSION` - used Python version,
-  * `QDRANT_VOLUME_DIR` - container's volume directory for Qdrant's storage,
-  * `MODEL_VOLUME_DIR` - container's volume directory for local pull of models from cloud storage,
+  * `QDRANT_VERSION` - version of Qdrant's docker image,
+  * `INTERACTIVE_APP_NAME` - name of docker image's working directory,
+  * `QDRANT_VOLUME_DIR` - Qdrant container's volume directory for Qdrant's storage,
+  * `MODEL_VOLUME_DIR` - interactive container's volume directory for local pull of models from cloud storage,
 
 Environment variables file for Python processing is ***.env-local*** or ***.env-cloud***. It contains a selection of variables:
   * `QDRANT_HOST` - host for Qdrant service,
@@ -64,14 +65,20 @@ data
 ├── metric_datasets
 │   ├── dogs
 │   ├── shoes
+│   ├── celebrities
+│   ├── logos
 ├── models
 │   ├── dogs
 │   └── shoes
+│   └── celebrities
+│   └── logos
 └── qdrant_storage
     ├── aliases
     ├── collections
     │   ├── dogs
     │   └── shoes
+    │   └── celebrities
+    │   └── logos
     └── collections_meta_wal
 interactive
 metrics
@@ -79,7 +86,7 @@ notebooks
 scripts
 
 ```
-This structure is split as follows:
+The structure of the `data` folder is split as follows:
   * `metric_datasets` - split into folders corresponding with data categories, each containing raw pictures that were used for model training and are being pulled as a result of visual search.
   * `models` - split into folders corresponding with data categories, each containing pretrained deep learning models,
   * `qdrant_storage` - storage for vector search engine (Qdrant), each data category has its own collection.
@@ -91,7 +98,7 @@ Installation using the terminal window:
 * `cd` to your target directory.
 * Clone [repository](https://github.com/qdrant/qdrant_demo.git) (preferably use SSH cloning).
 * Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1UeHYtgyewXmhDd3Qd-b2ud2u65a_kc3i/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained.
-* To install new environment execute one of the options below.
+* To set up a dockerized application, execute one of the options below in the terminal window.
 ``` 
 # Use Makefile:
 make run-local-build 
@@ -134,11 +141,16 @@ For secret and access keys contact the MinIO service's administrator or create a
 for your bucket. This may be performed from the level of MinIO Console.
 
 A need for building other connectors may arise - for now only manual fix could be applied: 
-  * Replace the client's definition and adjust functions for getting/listing objects.
+* Replace the client's definition and adjust functions for getting/listing objects.
 
 ### Docker Compose Structure
-TBD 
 
+There are two compose files, each responsible for setting up a different way of data provisioning to the final
+application:
+* `docker-compose-local.yaml` - After the `data` folder is manually pulled by the user, compose file creates two services: `qdrant-local` and `interactive-local`, which share appropriate parts of the `data` folder as their respective volumes.
+* `docker-compose-cloud.yaml` - The `data` folder is available on the MinIO cloud storage with access via the Python client. Only Qdrant-related and Model-related data is pulled locally for the services to run properly. Compose file creates two services: `qdrant-cloud` and `interactive-cloud` which share `model_volume` and `qdrant_volume` volumes.
+
+Those files share Qdrant and Python versions, `.env` file inputs, `Dockerfile-interactive` file and `docker-entrypoint-interactive.sh` script.
 
 ## Datasets
 
@@ -148,6 +160,7 @@ Models are trained separately for each category.
 Application returns search results from the scope of images available only within the selected data category.
 
 ### Current Datasets 
+
 * List of datasets with trained models that are available in the Visual Similrity Search application:
   * [Shoes dataset](https://www.kaggle.com/datasets/aryashah2k/large-shoe-dataset-ut-zappos50k)
     * A large shoe dataset consisting of 50,025 catalog images collected from Zappos.com. 
@@ -160,26 +173,53 @@ Application returns search results from the scope of images available only withi
     * A large dataset containing images of list of the most popular 100,000 actors as listed on the IMDb website (in 2015) together with information about their profiles date of birth, name, gender.
     * Since multiple people were present in original pictures, many of the cropped images have wrong labels. This issue was mostly resolved by selecting images of size +30kB.
     * Only pictures available in RGB mode were selected.
+  * [Logos dataset](https://www.kaggle.com/datasets/lyly99/logodet3k)
+    * The largest logo detection dataset with full annotation, which has 3,000 logo categories, about 200,000 manually annotated logo objects and 158,652 images.
 
 ### Queued Datasets
 
 * List of datasets that are queued for implementation:
-  * [Logos dataset](https://www.kaggle.com/datasets/lyly99/logodet3k)
-    * The largest logo detection dataset with full annotation, which has 3,000 logo categories, about 200,000 manually annotated logo objects and 158,652 images.
   * [Fashion dataset](https://www.kaggle.com/datasets/paramaggarwal/fashion-product-images-dataset)
     * Thr growing e-commerce industry presents us with a large dataset waiting to be scraped and researched upon. In addition to professionally shot high resolution product images, we also have multiple label attributes describing the product which was manually entered while cataloging. 
 
     
-## Application Module
+## Application
+
+The public version of the Cloud-based application is available here: [Visual Similarity Search App](https://visual-search.stxnext.pl/).
+Frontend is written in [Streamlit](https://streamlit.io/) and uses dedicated assets, local/cloud image storage, 
+pre-built models and Qdrant embeddings. The main page is split into 4 main sections:
+* `Input Options` - Initial category selection via buttons and option for resetting all inputs on the page.
+* `Business Usage` - Dataset description and potential use cases.
+* `Image Provisioning Options` - Chooses a way of selecting an input image.
+* `Input Image` - Shows a selected image.
+* `Search Options` - Allows a selection of a similarity benchmark and a number of shown images. After the search, you can reset the result with a dedicated button. Images that are the most similar to the input image appear in this section.
+* `Credits` - General information about repository.
+
+A given section is visible only when all inputs in previous sections were filled.
+
+
+## Add or Update Data
+
+A new dataset can be added to the existing list of options by:
+* Preprocessing the new/updated dataset and adding it to the `data` folder.
+* Training embedding and trunk models.
+* Uploading training results to the [Tensorboard](https://tensorboard.dev/).
+* Adding embeddings to the new collection in the Qdrant database.
+* Updating constants in the code.
+
+### Model Training Module
+
+To train a new dataset, add a new folder to the 
+
+
+### MLOps
+
 TBD
 
 
-## Model Training Module
-TBD
+### Qdrant Update
 
 
-## MLOps
-TBD
 
 
 ## Using Jupyter Notebooks

@@ -1,19 +1,18 @@
 import os
-import zipfile
 import shutil
-
-from pathlib import Path
-from loguru import logger
+import zipfile
 from distutils.dir_util import copy_tree
 
+from loguru import logger
+
 from common import env_handler
-from scripts import (
-    QDRANT_VOLUME_DIR,
-    MINIO_QDRANT_DATABASE_FILENAME,
-    REQUIRED_VOLUME_FOLDERS,
-)
 from common.consts import MINIO_MAIN_PATH
 from metrics.consts import METRIC_COLLECTION_NAMES
+from scripts import (
+    MINIO_QDRANT_DATABASE_FILENAME,
+    QDRANT_VOLUME_DIR,
+    REQUIRED_VOLUME_FOLDERS,
+)
 
 
 def preload_and_unzip_qdrant_database() -> None:

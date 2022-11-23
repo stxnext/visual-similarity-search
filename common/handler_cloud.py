@@ -1,16 +1,15 @@
-import os
 import json
+import os
 import random
-
 from pathlib import Path
+
 from minio import Minio
 from PIL import Image
-
 from qdrant_client.grpc import ScoredPoint
 
-from common.handler_env import EnvFunctionHandler
-from common.utils import singleton, WeightsPathGenerator
 from common.consts import MINIO_BUCKET_NAME, MINIO_MAIN_PATH
+from common.handler_env import EnvFunctionHandler
+from common.utils import WeightsPathGenerator, singleton
 from metrics.consts import MetricCollections
 
 

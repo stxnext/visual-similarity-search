@@ -1,6 +1,6 @@
-from PIL import Image
 from abc import ABC, abstractmethod
 
+from PIL import Image
 from qdrant_client.grpc import ScoredPoint
 
 from common.consts import PROJECT_PATH

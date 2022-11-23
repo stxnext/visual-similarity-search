@@ -1,17 +1,16 @@
-import torch
-import torchvision
-
 from dataclasses import dataclass
 from pathlib import Path
+
+import torch
+import torchvision
 from loguru import logger
 from PIL import Image, ImageDraw, ImageFont
-
 from qdrant_client.grpc import ScoredPoint
 from torchvision.transforms.transforms import Compose
 from tqdm.auto import tqdm
 
-from common import qdrant_client, env_handler
-
+from common import env_handler, qdrant_client
+from common.utils import singleton
 from metrics.consts import (
     DEVICE,
     INFER_TRANSFORM,
@@ -21,7 +20,6 @@ from metrics.consts import (
     MetricCollections,
 )
 from metrics.nets import MODEL_TYPE, get_full_pretrained_model
-from common.utils import singleton
 
 
 class InvalidCollectionName(Exception):
