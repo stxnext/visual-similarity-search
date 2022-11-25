@@ -17,9 +17,11 @@ Stable public version: [Visual Similarity Search App](https://visual-search.stxn
   - [Datasets](#datasets)
     - [Current Datasets](#datasets-current)
     - [Queued Datasets](#datasets-queued)
-  - [Application Module](#application-module)
-  - [Model Training Module](#model-training-module)
-  - [MLOps](#mlops)
+  - [Application](#application)
+    - [Add or Update Data](#add-or-update-data)
+    - [Model Training Module](#model-training-module)
+    - [MLOps](#mlops)
+    - [Qdrant Database Update](#qdrant-database-update)
   - [Using Jupyter Notebooks](#using-jupyter-notebooks)
   - [Installation Dependencies and Other Issues](#installation-dependencies-and-other-issues)
   - [Authors](#Authors)
@@ -259,7 +261,7 @@ Currently available boards:
 
 For more information visit [Tensorboard-dev](https://tensorboard.dev).
 
-### Qdrant Update
+### Qdrant Database Update
 
 Once the model is trained, a corresponding embeddings collection has to be uploaded to the Qdrant database.
 It can be performed by completing the following steps:
