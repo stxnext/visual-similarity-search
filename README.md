@@ -152,6 +152,7 @@ application:
 
 Those files share Qdrant and Python versions, `.env` file inputs, `Dockerfile-interactive` file and `docker-entrypoint-interactive.sh` script.
 
+
 ## Datasets
 
 Both Model Training and Application modules use the same scope of datasets. 
@@ -182,7 +183,7 @@ Application returns search results from the scope of images available only withi
   * [Fashion dataset](https://www.kaggle.com/datasets/paramaggarwal/fashion-product-images-dataset)
     * Thr growing e-commerce industry presents us with a large dataset waiting to be scraped and researched upon. In addition to professionally shot high resolution product images, we also have multiple label attributes describing the product which was manually entered while cataloging. 
 
-    
+
 ## Application
 
 The public version of the Cloud-based application is available here: [Visual Similarity Search App](https://visual-search.stxnext.pl/).
@@ -209,17 +210,67 @@ A new dataset can be added to the existing list of options by:
 
 ### Model Training Module
 
-To train a new dataset, add a new folder to the 
+Model training can be performed after following preparation steps has been completed:
+* Contents of the `dataset_name` dataset has been added to the `data/metric_datasets/dataset_name` directory. 
+* A `meta_dataset_name.csv` metadata file has been prepared (normally stored under `data/qdrant_storage` directory. This file contains information on the contents of the `dataset_name` dataset split by columns:
+  * `` - first, empty name column, contains index number. 
+  * `file` - required - name of the file. 
+  * `class` - required - name of the class a given image is a part of. 
+  * `label` - required - an integer representing the class. 
+  * `additional_col_name` - not required - additional column with information used  for captioning images in the final application. There may be multiple columns like that one added.
+* Optional training parameters (added in terminal command):
+  * `data_dir` - Path for data dir.
+  * `meta` - Path for meta file of dataset.
+  * `name` - Name of training, used to create logs, models directories.
+  * `trunk_model` - Name of pretrained model from torchvision.
+  * `embedder_layers` - Layer vector.
+  * `split` - Train/test split factor.
+  * `batch_size` - Batch size for training.
+  * `epochs` - Number of epochs in training.
+  * `lr` - Default learning rate.
+  * `weight_decay` - Weight decay for learning rate.
+  * `sampler_m` - Number of samples per class.
+  * `input_size` - Input size (width and height) used for resizing.
 
+To run the training module run the following command in the terminal (adjust based on above list of parameters).
+```
+python metrics/train.py --data_dir "data/metric_datasets/dataset_name" --meta "data/qdrant_storage/meta_dataset_name.csv" --name "metric_dataset_name"
+```
+
+After the training process is done, and final model is one more step to follow:
+* Copy `trunk.pth` and `embedder.pth` files to the `data/models/dataset_name` folder.
 
 ### MLOps
 
-TBD
+Metric logs generated during the training period can be uploaded to the Tensorboard Dev using following command.
+```
+tensorboard dev upload --logdir metric_dataset_name/training_logs \
+    --name "dataset_name training experiments" \
+    --description "Metrics for training experiments on dataset_name dataset."
+```
 
+This command outputs a link to the dashboard containing metric charts divided by experiments.
+
+Currently available boards:
+* [Dogs](https://tensorboard.dev/experiment/oaXJiP3FRm2w9BHXzdmnJQ/#scalars)
+* [Shoes](https://tensorboard.dev/experiment/DhrhyBFaSJiGwEfP9KoGDA/#scalars)
+* [Celebrities](https://tensorboard.dev/experiment/TDgjYNDUQ32DoKYEZoIoow/#scalars)
+* [Logos](https://tensorboard.dev/experiment/1r2BsdkER3yRBdqBjF5y9A/#scalars)
+
+For more information visit [Tensorboard-dev](https://tensorboard.dev).
 
 ### Qdrant Update
 
+Once the model is trained, a corresponding embeddings collection has to be uploaded to the Qdrant database.
+It can be performed by completing the following steps:
+* Modify `MetricCollections` class with a new entry for `dataset_name`.
+* Add relevant reference in the `CATEGORY_DESCR` parameter.
+* Copy notebook `notebooks/demo-qdrant.ipynb` to the main `visual-similarity-search` directory and run it in Jupyter.
+* Run docker container containing Qdrant database.
+* Run commands for (re)creating and upserting `dataset_name` embeddings to the new collection - collection name has to be the same as `dataset_name`.
 
+Optionally collections that are not used can be deleted from the Qdrant database. 
+If the Qdrant database is not based on the volume, after recreating Docker container the database will not retain inputted entries.
 
 
 ## Using Jupyter Notebooks

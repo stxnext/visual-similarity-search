@@ -287,7 +287,7 @@ class ModuleManager:
 
     def run_app(self):
         logger.info("Set main graphical options.")
-        st.set_page_config(layout="wide")
+        st.set_page_config(page_title="visual-search.stxnext.pl", layout="wide")
         self.widget_formatting()
 
         logger.info("Create a header with initial paragraph.")
