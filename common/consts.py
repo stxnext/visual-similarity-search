@@ -17,7 +17,6 @@ INTERACTIVE_ASSETS_DICT = {
         """,
     "github_link": "https://github.com/stxnext/visual-similarity-search",
 }
-
 GRID_NROW_NUMBER = 3
 EXAMPLE_PATH = PROJECT_PATH / "interactive" / "examples"
 CATEGORY_DESCR = {
