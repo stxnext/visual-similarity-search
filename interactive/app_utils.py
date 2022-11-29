@@ -3,8 +3,7 @@ from loguru import logger
 from PIL import Image
 
 from common import env_handler
-from common.consts import INTERACTIVE_ASSETS_DICT
-from interactive import CATEGORY_DESCR, GRID_NROW_NUMBER
+from common.consts import INTERACTIVE_ASSETS_DICT, CATEGORY_DESCR, GRID_NROW_NUMBER
 from metrics.consts import MetricCollections
 from metrics.core import MetricClient
 

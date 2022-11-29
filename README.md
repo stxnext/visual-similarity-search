@@ -96,7 +96,7 @@ Installation using the terminal window:
 * Install ***git***, ***docker*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
-* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1ru2FHcV8xBDqX9Q_zgAkJYDlYWlszmOD/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained.
+* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1ru2FHcV8xBDqX9Q_zgAkJYDlYWlszmOD/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
 * Install Python version 3.10 and ***pip***, ***pipenv*** libraries.
 ```
 sudo apt-get install python3.10 
@@ -145,7 +145,7 @@ Installation using the terminal window:
 * Install ***git***, ***docker***, ***docker-compose*** and ***make*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
-* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1ru2FHcV8xBDqX9Q_zgAkJYDlYWlszmOD/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained.
+* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1ru2FHcV8xBDqX9Q_zgAkJYDlYWlszmOD/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
 * To set up a dockerized application, execute one of the options below in the terminal window.
 ``` 
 # Use Makefile:
@@ -285,7 +285,7 @@ To run the training module run the following command in the terminal (adjust bas
 python metrics/train.py --data_dir "data/metric_datasets/dataset_name" --meta "data/qdrant_storage/meta_dataset_name.csv" --name "metric_dataset_name"
 ```
 
-After the training process is done, and final model is one more step to follow:
+After training, follow steps:
 * Copy `trunk.pth` and `embedder.pth` files to the `data/models/dataset_name` folder.
 
 ### MLOps
