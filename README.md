@@ -8,10 +8,12 @@ There are two modules created within the engine:
 Stable public version: [Visual Similarity Search App](https://visual-search.stxnext.pl/).
 
 
+
 ## Table of Contents
   - [Installation](#installation)
-    - [Installation - Local](#installation-local)
-    - [Installation - Cloud](#installation-cloud)
+    - [Installation - Local - Manual](#installation-local-manual)
+    - [Installation - Local - Docker](#installation-local-docker)
+    - [Installation - Cloud - Docker](#installation-cloud-docker)
     - [Installation - Accessing MinIO](#installation-accessing-minio)
     - [Installation - Docker Compose Structure](#installation-docker-compose-structure)
   - [Datasets](#datasets)
@@ -31,12 +33,7 @@ Stable public version: [Visual Similarity Search App](https://visual-search.stxn
 ## Installation
 
 Both modules mentioned in the introduction use libraries specified in the ***poetry.lock*** file which are resolved
-based on the contents of ***pyproject.toml*** file. To install project's libraries in your Python environment, 
-install [poetry](https://pypi.org/project/poetry/) library, navigate to the directory with ***pyproject.toml*** 
-in terminal and run:
-```
-poetry install
-```
+based on the contents of ***pyproject.toml*** file.
 
 Installation and functioning of the modules depends on the `data` folder and two environment files - first for Docker-Compose build, 
 and second for working of Python app.
@@ -93,13 +90,62 @@ The structure of the `data` folder is split as follows:
   * `models` - split into folders corresponding with data categories, each containing pretrained deep learning models,
   * `qdrant_storage` - storage for vector search engine (Qdrant), each data category has its own collection.
 
-### Local
+### Local - Manual
+
+Installation using the terminal window:
+* Install ***git***, ***docker*** packages.
+* `cd` to your target directory.
+* Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
+* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1ru2FHcV8xBDqX9Q_zgAkJYDlYWlszmOD/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained.
+* Install Python version 3.10 and ***pip***, ***pipenv*** libraries.
+```
+sudo apt-get install python3.10 
+curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+python3.10 -m pip install pipenv  
+```
+* Set up local environment and run shell:
+```
+python3.10 -m pipenv --python 3.10
+python3.10 -m pipenv shell
+```
+* Within the shell install [poetry](https://pypi.org/project/poetry/) and dependencies:
+```
+pip install poetry --no-cache 
+poetry update 
+```
+* Run docker and set up Qdrant database docker image
+```
+docker run -p 6333:6333 \                               
+    -v $(pwd)/data/qdrant_storage:/qdrant/storage \
+    qdrant/qdrant:v0.10.3
+
+```
+* Create ***.env-local-no-docker*** file by copying and renaming the ***.env-local*** file.
+* Fill parameters of ***.env-local-no-docker*** file with specific values:
+  * `QDRANT_HOST=localhost`,
+* Load environmental variables.
+```
+export PYTHONPATH="${PYTHONPATH}:/"
+export $(grep -v '^#' .env | xargs)
+export $(grep -v '^#' .env-local-no-docker | xargs)
+```
+* Run Streamlit app
+```
+# If Poetry env set as default Python env.
+streamlit run interactive/search_app.py --server.port=$INTERACTIVE_PORT --server.address=0.0.0.0
+
+# Otherwise.
+poetry run python -m streamlit run interactive/search_app.py --server.port=$INTERACTIVE_PORT --server.address=0.0.0.0
+```
+* Access the visual similarity search engine under URL: [localhost](http://0.0.0.0:8080).
+
+### Local - Docker
 
 Installation using the terminal window:
 * Install ***git***, ***docker***, ***docker-compose*** and ***make*** packages.
 * `cd` to your target directory.
-* Clone [repository](https://github.com/qdrant/qdrant_demo.git) (preferably use SSH cloning).
-* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1UeHYtgyewXmhDd3Qd-b2ud2u65a_kc3i/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained.
+* Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
+* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1ru2FHcV8xBDqX9Q_zgAkJYDlYWlszmOD/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained.
 * To set up a dockerized application, execute one of the options below in the terminal window.
 ``` 
 # Use Makefile:
@@ -111,12 +157,12 @@ make run-local-build-interactive-restart
 ```
 * Access the visual similarity search engine under URL: [localhost](http://0.0.0.0:8080).
 
-### Cloud
+### Cloud - Docker
 
 Installation using the terminal window:
 * Install ***git***, ***docker***, ***docker-compose*** and ***make*** packages.
 * `cd` to your target directory.
-* Clone [repository](https://github.com/qdrant/qdrant_demo.git) (preferably use SSH cloning).
+* Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
 * Create ***.env-cloud*** file by copying and renaming the ***.env-local*** file.
 * Fill parameters of ***.env-cloud*** file with specific values:
   * `QDRANT_HOST=qdrant-cloud`,
@@ -287,16 +333,10 @@ Jupyter notebooks serve as a support during the development:
 ## Installation Dependencies and Other Issues
 
 * Installation dependencies are resolved and then defined by [poetry](https://pypi.org/project/poetry/). If some dependencies cannot be resolved automatically, down-/up-grading a version of the problematic library defined in the ***pyproject.toml*** file may be needed.
-* According to the Docker Image's documentation, Qdrant database works only on the Linux/AMD64 Os/Architecture.
+* According to the Docker Image's documentation, Qdrant database works on the Linux/AMD64 Os/Architecture.
 * ***faiss-cpu*** library is used instead of ***faiss*** due to the former being implemented for Python's version <=3.7 only.
 * A fixed version of Qdrant (v0.10.3) is being used due to its fast development and storage's versioning. Not only is a library being versioned, but collection structure does too. In consequence a collection built on Qdrant version 0.9.X is unreadable by version 0.10.X.
-* When running the code locally, outside docker-compose build an issue with Python modules visibility may occur. In that scenario set up you terminal directory to the `visual-similarity-search` folder and run following commands in your terminal.
-```
-export PYTHONPATH="${PYTHONPATH}:/"
-export $(grep -v '^#' .env | xargs)
-export $(grep -v '^#' .env-local | xargs)
-```
-* On first run of the Streamlit application, when running `Find Similar Images` button for the first time, models are being loaded to the library. This is one time event and will not influence a performance for next searches.
+* On first run of the Streamlit application, when running `Find Similar Images` button for the first time, models are being loaded to the library. This is a one time event and will not influence a performance for future searches.
 
 
 ## Communication
