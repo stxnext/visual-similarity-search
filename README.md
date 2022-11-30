@@ -5,9 +5,9 @@ There are two modules created within the engine:
 1. Interactive Application - used for finding the closest match of uploaded or selected image within a given data category.
 2. Model Training/Deployment Module - used when a new data category is added to the application.
 
-Stable public version: [Visual Similarity Search App](https://visual-search.stxnext.pl/).
+**Demo: [Visual Similarity Search App](https://visual-search.stxnext.pl/)**
 
-
+Proudly developed by [STX Next Machine Learning Team](https://www.stxnext.com/services/machine-learning/?utm_source=github&utm_medium=mlde&utm_campaign=visearch-demo)
 
 ## Table of Contents
   - [Installation](#installation)
@@ -350,6 +350,9 @@ Jupyter notebooks serve as a support during the development:
 * [Szymon Idziniak](https://www.linkedin.com/in/szymon-idziniak-05bb01181/)
 * [Bartosz Mielczarek](https://www.linkedin.com/in/bartosz-mielczarek-647346117/)
 
+
+
+Want to talk about [Machine Learning Services](https://www.stxnext.com/services/machine-learning/?utm_source=github&utm_medium=mlde&utm_campaign=visearch-demo) visit our webpage. 
 
 ## Licenses
 All source code is licensed under the MIT License.
