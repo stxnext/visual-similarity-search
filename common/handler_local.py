@@ -2,7 +2,6 @@ import json
 import random
 
 from PIL import Image
-
 from qdrant_client.grpc import ScoredPoint
 
 from common.handler_env import EnvFunctionHandler
@@ -39,7 +38,7 @@ class LocalFunctionHandler(EnvFunctionHandler):
         for caption in captions_local:
             imgs_local.append(Image.open(local_collection_dir / caption))
             captions_local_str.append(
-                caption.stem
+                caption.name
             )  # this result is loaded directly to the application state
         return captions_local_str, imgs_local
 

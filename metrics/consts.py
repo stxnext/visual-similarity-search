@@ -1,9 +1,7 @@
-import torch
-
 from enum import Enum
 
+import torch
 from torchvision import transforms
-
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -55,6 +53,8 @@ class MetricCollections(Enum):
 
     DOGS = "dogs"
     SHOES = "shoes"
+    CELEBRITIES = "celebrities"
+    LOGOS = "logos"
 
 
 METRIC_COLLECTION_NAMES = [x.value for x in iter(MetricCollections)]

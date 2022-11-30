@@ -1,18 +1,11 @@
 import streamlit as st
-
-from PIL import Image
 from loguru import logger
+from PIL import Image
 
-from interactive import (
-    CATEGORY_DESCR,
-    IMAGE_EXAMPLES,
-)
 from common import env_handler
-from interactive import GRID_NROW_NUMBER
-
+from common.consts import CATEGORY_DESCR, GRID_NROW_NUMBER, INTERACTIVE_ASSETS_DICT
 from metrics.consts import MetricCollections
 from metrics.core import MetricClient
-from common.consts import INTERACTIVE_ASSETS_DICT
 
 
 class ModuleManager:
@@ -123,7 +116,16 @@ class ModuleManager:
                     category_enum.value
                 ]["description"]
                 st.session_state.category_option = category_enum
+
         st.write("")
+        if st.session_state.category_option:
+            st.subheader("Business Usage")
+            st.write(
+                CATEGORY_DESCR[st.session_state.category_option.value]["business_usage"]
+            )
+            st.write(
+                f"Source Dataset: [link]({CATEGORY_DESCR[st.session_state.category_option.value]['source']})"
+            )
 
     def create_image_provisioning_options(
         self, provisioning_options: list[str]
@@ -145,11 +147,15 @@ class ModuleManager:
         self.reset_states_after_image_provisioning_list()
         st.session_state.example_captions = [
             s_img["label"]
-            for s_img in IMAGE_EXAMPLES[st.session_state.category_option.value]
+            for s_img in CATEGORY_DESCR[st.session_state.category_option.value][
+                "image_examples"
+            ]
         ]  # get captions
         st.session_state.example_imgs = [
             Image.open(s_img["path"])
-            for s_img in IMAGE_EXAMPLES[st.session_state.category_option.value]
+            for s_img in CATEGORY_DESCR[st.session_state.category_option.value][
+                "image_examples"
+            ]
         ]  # get images
         example_images_zip = dict(
             zip(st.session_state.example_captions, st.session_state.example_imgs)
@@ -280,7 +286,7 @@ class ModuleManager:
 
     def run_app(self):
         logger.info("Set main graphical options.")
-        st.set_page_config(layout="wide")
+        st.set_page_config(page_title="visual-search.stxnext.pl", layout="wide")
         self.widget_formatting()
 
         logger.info("Create a header with initial paragraph.")
@@ -292,25 +298,25 @@ class ModuleManager:
         logger.info("Create Main Filters - till category search")
         self.create_main_filters()
 
-        logger.info("Columnar split")
-        col_image_1, col_image_2 = st.columns([1, 1])
-
         logger.info("Image Provisioning")
-        with col_image_1:
-            logger.info("Image Provisioning Type Selection")
-            provisioning_options = [
-                "Example List",
-                "Pull Randomly from the Storage",
-                "File Upload",
-            ]
-            self.create_image_provisioning_options(
-                provisioning_options=provisioning_options
-            )
-        with col_image_2:
-            logger.info(
-                "Image Selection - only if st.session_state.category_option of main filters was chosen beforehand."
-            )
-            if st.session_state.category_option:
+        if st.session_state.category_option:
+            logger.info("Columnar split")
+            st.subheader("Image Provisioning Options")
+            col_image_1, col_image_2 = st.columns([1, 1])
+            with col_image_1:
+                logger.info("Image Provisioning Type Selection")
+                provisioning_options = [
+                    "Example List",
+                    "Pull Randomly from the Storage",
+                    "File Upload",
+                ]
+                self.create_image_provisioning_options(
+                    provisioning_options=provisioning_options
+                )
+            with col_image_2:
+                logger.info(
+                    "Image Selection - only if st.session_state.category_option of main filters was chosen beforehand."
+                )
                 if st.session_state.provisioning_options == provisioning_options[0]:
                     self.create_image_provision_for_examples()
                 elif st.session_state.provisioning_options == provisioning_options[1]:
@@ -331,3 +337,7 @@ class ModuleManager:
             logger.info("Similarity Search Button")
             if st.button("Find Similar Images"):
                 self.extract_similar_images()
+
+        logger.info("GitHub Fork")
+        st.subheader("Credits")
+        st.write(f"Fork us on [GitHub]({INTERACTIVE_ASSETS_DICT['github_link']}).")

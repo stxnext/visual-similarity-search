@@ -1,16 +1,15 @@
-import torch
-
-from loguru import logger
 from typing import Optional
+
+import torch
+from loguru import logger
 from pytorch_metric_learning.utils.common_functions import Identity
 from torch import Tensor, nn
 from torchvision import models as pretrained_models
 
 from common import env_handler
-
-from metrics.consts import METRIC_COLLECTION_NAMES, DEVICE, MetricCollections
-from metrics.utils import rgetattr, rsetattr
 from common.utils import WeightsPathGenerator
+from metrics.consts import DEVICE, METRIC_COLLECTION_NAMES, MetricCollections
+from metrics.utils import rgetattr, rsetattr
 
 MODEL_TYPE = nn.DataParallel | nn.Module
 

@@ -2,18 +2,17 @@ from __future__ import annotations
 
 import json
 import logging
+from dataclasses import dataclass
+from functools import reduce
+from pathlib import Path
+from typing import Any, Optional
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torchvision.transforms as T
-
-from dataclasses import dataclass
-from functools import reduce
-from pathlib import Path
-from typing import Optional, Any
 from cycler import cycler
 from PIL import Image
-
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
 
@@ -70,7 +69,7 @@ class DatasetCombined:
             frac=1
         )  # shuffle dataframe just in case, because split is not class balanced (not guaranteed)
         # add data_dir path to meta file, so filenames will contain absolute path for data
-        df["file"] = df["file"].apply(lambda file: str((data_dir / file).absolute()))
+        df["file"] = df["file"].apply(lambda file: str(data_dir / file))
         x_train, x_test, y_train, y_test = train_test_split(
             np.array(df["file"]), np.array(df["label"]), train_size=split
         )

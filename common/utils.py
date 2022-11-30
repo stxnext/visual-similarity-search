@@ -1,5 +1,5 @@
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 from common.consts import MINIO_MAIN_PATH, PROJECT_PATH
 from metrics.consts import MetricCollections

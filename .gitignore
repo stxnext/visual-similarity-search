@@ -154,6 +154,7 @@ celerybeat.pid
 
 # Environments
 .env-cloud
+.env-local-no-docker
 .venv
 env/
 venv/

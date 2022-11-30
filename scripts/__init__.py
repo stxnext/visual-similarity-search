@@ -1,7 +1,5 @@
 import os
-
 from pathlib import Path
-
 
 QDRANT_VOLUME_DIR = Path(os.getenv("QDRANT_VOLUME_DIR"))
 DATA_DIR = "data"
