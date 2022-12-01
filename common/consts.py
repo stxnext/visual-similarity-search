@@ -16,6 +16,7 @@ INTERACTIVE_ASSETS_DICT = {
             Algorithm uses image embeddings and deep neural networks to determine a value of cosine similarity metric.
         """,
     "github_link": "https://github.com/stxnext/visual-similarity-search",
+    "our_ml_site_link": "https://www.stxnext.com/services/machine-learning/?utm_source=github&utm_medium=mlde&utm_campaign=visearch-demo",
 }
 GRID_NROW_NUMBER = 3
 EXAMPLE_PATH = PROJECT_PATH / "interactive" / "examples"

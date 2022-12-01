@@ -1,6 +1,7 @@
 # Visual Similarity Search - Category-based Image Comparison
 
-Similarity search engine for comparing images within selected categories. 
+Visual Similarity Search Engine demo app - built with the use of PyTorch Metric Learning and Qdrant vector database.
+Similarity search engine is used for comparing uploaded images with content of selected categories. 
 There are two modules created within the engine:
 1. Interactive Application - used for finding the closest match of uploaded or selected image within a given data category.
 2. Model Training/Deployment Module - used when a new data category is added to the application.
@@ -22,7 +23,7 @@ Proudly developed by [STX Next Machine Learning Team](https://www.stxnext.com/se
   - [Application](#application)
     - [Add or Update Data](#add-or-update-data)
     - [Model Training Module](#model-training-module)
-    - [MLOps](#mlops)
+    - [Training Results](#training-results)
     - [Qdrant Database Update](#qdrant-database-update)
   - [Using Jupyter Notebooks](#using-jupyter-notebooks)
   - [Installation Dependencies and Other Issues](#installation-dependencies-and-other-issues)
@@ -207,6 +208,7 @@ Both Model Training and Application modules use the same scope of datasets.
 Each category corresponds with a single dataset.
 Models are trained separately for each category. 
 Application returns search results from the scope of images available only within the selected data category.
+All datasets listed below are the property of their respective owners and are used .
 
 ### Current Datasets 
 
@@ -258,6 +260,13 @@ A new dataset can be added to the existing list of options by:
 
 ### Model Training Module
 
+Model training module utilizes a concept of Mertic/Distance learning. Metric/Distance Learning aims to learn data 
+embeddings/feature vectors in a way that the distance in the embedded space preserves the objects’ 
+similarity - similar objects get close and dissimilar objects get far away. To train the model we use 
+the [Pytorch Metric Learning](https://kevinmusgrave.github.io/pytorch-metric-learning/) package which consists of 
+9 modules compatible with PyTorch models.
+
+The target of a model training module is to translate images into vectors in the embedding space.
 Model training can be performed after following preparation steps has been completed:
 * Contents of the `dataset_name` dataset has been added to the `data/metric_datasets/dataset_name` directory. 
 * A `meta_dataset_name.csv` metadata file has been prepared (normally stored under `data/qdrant_storage` directory. This file contains information on the contents of the `dataset_name` dataset split by columns:
@@ -288,9 +297,15 @@ python metrics/train.py --data_dir "data/metric_datasets/dataset_name" --meta "d
 After training, follow steps:
 * Copy `trunk.pth` and `embedder.pth` files to the `data/models/dataset_name` folder.
 
-### MLOps
+### Training Results
 
-Metric logs generated during the training period can be uploaded to the Tensorboard Dev using following command.
+When a model training is finalized, a folder containing training results for this experiment is created. 
+Part of these results showcase model performance and information regarding metrics and their evolution in 
+time. To interpret these results better, this data can be ingested by 
+[Tensorboard](https://www.tensorflow.org/tensorboard), providing user with necessary dashboards.
+
+Metric logs generated during the training period can be uploaded to the [Tensorboard-dev](https://tensorboard.dev), 
+which is a server-based repository of experimental results, using following command.
 ```
 tensorboard dev upload --logdir metric_dataset_name/training_logs \
     --name "dataset_name training experiments" \
@@ -305,7 +320,6 @@ Currently available boards:
 * [Celebrities](https://tensorboard.dev/experiment/TDgjYNDUQ32DoKYEZoIoow/#scalars)
 * [Logos](https://tensorboard.dev/experiment/1r2BsdkER3yRBdqBjF5y9A/#scalars)
 
-For more information visit [Tensorboard-dev](https://tensorboard.dev).
 
 ### Qdrant Database Update
 
@@ -349,10 +363,11 @@ Jupyter notebooks serve as a support during the development:
 ## Authors
 * [Szymon Idziniak](https://www.linkedin.com/in/szymon-idziniak-05bb01181/)
 * [Bartosz Mielczarek](https://www.linkedin.com/in/bartosz-mielczarek-647346117/)
-
+* [Krzysztof Sopyła](https://www.linkedin.com/in/krzysztofsopyla)
 
 
 Want to talk about [Machine Learning Services](https://www.stxnext.com/services/machine-learning/?utm_source=github&utm_medium=mlde&utm_campaign=visearch-demo) visit our webpage. 
+
 
 ## Licenses
 All source code is licensed under the MIT License.

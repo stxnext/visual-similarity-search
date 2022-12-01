@@ -341,3 +341,6 @@ class ModuleManager:
         logger.info("GitHub Fork")
         st.subheader("Credits")
         st.write(f"Fork us on [GitHub]({INTERACTIVE_ASSETS_DICT['github_link']}).")
+        st.write(
+            f"Want to talk about [Machine Learning Services]({INTERACTIVE_ASSETS_DICT['our_ml_site_link']}) visit our webpage."
+        )
