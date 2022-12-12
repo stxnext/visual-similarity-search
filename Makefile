@@ -31,7 +31,7 @@ run-cloud-build-interactive-restart:
 
 run-local-build:
 	docker-compose --file docker-compose-local.yaml --project-name "visual-similarity-search-local" \
-	up -d --no-deps --build ;\
+	up -d --no-deps --build
 
 run-local-build-qdrant-restart:
 	docker-compose --file docker-compose-local.yaml --project-name "visual-similarity-search-local" \

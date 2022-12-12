@@ -46,7 +46,7 @@ class CloudFunctionHandler(EnvFunctionHandler):
         Handler for returning images with the highest similarity scores from cloud storage.
         Additionally, filenames are returned as future captions in front-end module.
         """
-        object_list = [MINIO_MAIN_PATH / r.payload["file"] for r in results]
+        object_list = [MINIO_MAIN_PATH / r.payload["file"].replace('\\', '/') for r in results]
         return [
             Image.open(
                 self.minio_client.get_object(

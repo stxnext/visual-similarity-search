@@ -97,7 +97,7 @@ Installation using the terminal window:
 * Install ***git***, ***docker*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
-* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1ru2FHcV8xBDqX9Q_zgAkJYDlYWlszmOD/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
+* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1hvVP1COcZJkNoUUhpFvvtnJ6MfEyB3Wr/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
 * Install Python version 3.10 and ***pip***, ***pipenv*** libraries.
 ```
 sudo apt-get install python3.10 
@@ -146,7 +146,7 @@ Installation using the terminal window:
 * Install ***git***, ***docker***, ***docker-compose*** and ***make*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
-* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1ru2FHcV8xBDqX9Q_zgAkJYDlYWlszmOD/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
+* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1hvVP1COcZJkNoUUhpFvvtnJ6MfEyB3Wr/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
 * To set up a dockerized application, execute one of the options below in the terminal window.
 ``` 
 # Use Makefile:
@@ -346,6 +346,7 @@ Jupyter notebooks serve as a support during the development:
 
 ## Installation Dependencies and Other Issues
 
+* For installation on Windows, install [wsl](https://learn.microsoft.com/en-us/windows/wsl/install), [modify Docker](https://stackoverflow.com/questions/61592709/docker-not-running-on-ubuntu-wsl-due-to-error-cannot-connect-to-the-docker-daemo) and follow instructions for Linux.
 * Installation dependencies are resolved and then defined by [poetry](https://pypi.org/project/poetry/). If some dependencies cannot be resolved automatically, down-/up-grading a version of the problematic library defined in the ***pyproject.toml*** file may be needed.
 * According to the Docker Image's documentation, Qdrant database works on the Linux/AMD64 Os/Architecture.
 * ***faiss-cpu*** library is used instead of ***faiss*** due to the former being implemented for Python's version <=3.7 only.
