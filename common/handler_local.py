@@ -20,7 +20,7 @@ class LocalFunctionHandler(EnvFunctionHandler):
         Handler for returning images with the highest similarity scores from local storage.
         Additionally, filenames are returned as future captions in front-end module.
         """
-        object_list = [r.payload["file"].replace('\\', '/') for r in results]
+        object_list = [r.payload["file"].replace("\\", "/") for r in results]
         return [Image.open(obj) for obj in object_list]
 
     def get_random_images_from_collection(

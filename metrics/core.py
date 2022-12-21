@@ -4,7 +4,7 @@ from pathlib import Path
 import torch
 import torchvision
 from loguru import logger
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 from qdrant_client.grpc import ScoredPoint
 from torchvision.transforms.transforms import Compose
 from tqdm.auto import tqdm
@@ -105,14 +105,13 @@ class MetricClient:
         collection_name: MetricCollections,
         benchmark: int,
         k: int = 25,
-    ) -> tuple[Image.Image, list[Image.Image]]:
+    ) -> tuple[Image.Image, list[Image.Image], list[ScoredPoint]]:
         """
         Search for similar images of random image from given collection.
         Returns tuple of images [anchor_image, grid image of k most similar images (the biggest cosine similarity)]
         """
         results = self.search(base_img, collection_name, limit=k)
         results_bench = [r for r in results if round(r.score, 4) >= benchmark / 100]
-        scores_bench = [100 * round(r.score, 4) for r in results_bench]
         if len(results_bench) > 0:
             imgs = [
                 RESIZE_TRANSFORM(img)
@@ -120,16 +119,6 @@ class MetricClient:
             ]
             to_image = torchvision.transforms.ToPILImage()
             imgs_transformed = [to_image(img) for img in imgs]
-
-            # Adding similarity scores to the images with best
-            for i, img in enumerate(imgs_transformed):
-                draw = ImageDraw.Draw(img)
-                draw.text(
-                    xy=(10, 10),
-                    text="{0:.2f}%".format(scores_bench[i]),
-                    font=ImageFont.truetype("DejaVuSans-Bold.ttf", 40),
-                    fill=(0, 255, 0),
-                )
         else:
             imgs_transformed = None
-        return base_img, imgs_transformed
+        return base_img, imgs_transformed, results_bench

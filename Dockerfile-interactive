@@ -18,13 +18,16 @@ RUN poetry install
 
 # Update env variables
 ENV PATH /root/.local/bin:$PATH
-ENV PYTHONPATH "${PYTHONPATH}:/interactive"
-ENV PYTHONPATH "${PYTHONPATH}:/metrics"
-ENV PYTHONPATH "${PYTHONPATH}:/common"
-ENV PYTHONPATH "${PYTHONPATH}:/scripts"
+ENV PYTHONPATH "${PYTHONPATH}:/"
+#ENV PYTHONPATH "${PYTHONPATH}:/.streamlit"
+#ENV PYTHONPATH "${PYTHONPATH}:/interactive"
+#ENV PYTHONPATH "${PYTHONPATH}:/metrics"
+#ENV PYTHONPATH "${PYTHONPATH}:/common"
+#ENV PYTHONPATH "${PYTHONPATH}:/scripts"
 
 # Load files from repository
 COPY /api /$APP_NAME/api
+COPY /.streamlit /$APP_NAME/.streamlit
 COPY /interactive /$APP_NAME/interactive
 COPY /metrics /$APP_NAME/metrics
 COPY /common /$APP_NAME/common
