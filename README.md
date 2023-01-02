@@ -97,7 +97,7 @@ Installation using the terminal window:
 * Install ***git***, ***docker*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
-* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1hvVP1COcZJkNoUUhpFvvtnJ6MfEyB3Wr/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
+* Download `data.zip` file from the [Cloud Storage](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/data.zip) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
 * Install Python version 3.10 and ***pip***, ***pipenv*** libraries.
 ```
 sudo apt-get install python3.10 
@@ -146,7 +146,7 @@ Installation using the terminal window:
 * Install ***git***, ***docker***, ***docker-compose*** and ***make*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
-* Download `data.zip` file from the [Google Drive](https://drive.google.com/file/d/1hvVP1COcZJkNoUUhpFvvtnJ6MfEyB3Wr/view?usp=sharing) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
+* Download `data.zip` file from the [Cloud Storage](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/data.zip) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
 * To set up a dockerized application, execute one of the options below in the terminal window.
 ``` 
 # Use Makefile:
