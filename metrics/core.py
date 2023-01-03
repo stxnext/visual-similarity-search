@@ -122,6 +122,8 @@ class BestChoiceImagesDataset:
         """
         results_all = client.search(anchor, collection_name, limit=k)
         results = [r for r in results_all if round(r.score, 4) >= benchmark / 100]
+
+        similars = None
         if len(results) > 0:
             imgs = [
                 RESIZE_TRANSFORM(img)
@@ -129,8 +131,6 @@ class BestChoiceImagesDataset:
             ]
             to_image = torchvision.transforms.ToPILImage()
             similars = [to_image(img) for img in imgs]
-        else:
-            similars = None
 
         return cls(
             similars=similars,
