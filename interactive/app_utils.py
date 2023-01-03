@@ -7,7 +7,7 @@ from PIL import Image
 from common import env_handler
 from common.consts import CATEGORY_DESCR, GRID_NROW_NUMBER, INTERACTIVE_ASSETS_DICT
 from metrics.consts import MetricCollections
-from metrics.core import MetricClient
+from metrics.core import MetricClient, BestChoiceImagesDataset
 
 
 class ModuleManager:
@@ -295,12 +295,9 @@ class ModuleManager:
         """
         Shows images in order of their similarity to the original input image.
         """
-        (
-            anchor,
-            similars,
-            results,
-        ) = self.metric_client.get_best_choice_for_uploaded_image(
-            base_img=file,
+        best_images_dataset = BestChoiceImagesDataset.get_best_choice_for_uploaded_image(
+            client=self.metric_client,
+            anchor=file,
             collection_name=collection_name,
             k=k,
             benchmark=benchmark,
@@ -311,9 +308,9 @@ class ModuleManager:
                 "class": r.payload["class"],
                 "similarity": "{0:.2f}%".format(100 * round(r.score, 4)),
             }
-            for r in results
+            for r in best_images_dataset.results
         ]
-        if similars:
+        if best_images_dataset.similars:
             with st.expander("", expanded=True):
                 results_text = f'Found {st.session_state.similar_img_number} images in the "{st.session_state.category_option.value}" category'
                 st.markdown(
@@ -325,9 +322,9 @@ class ModuleManager:
                     f"<p style='text-align: center;'>{comment_text}</p>",
                     unsafe_allow_html=True,
                 )
-                col_nr = min(grid_nrow, len(similars))
+                col_nr = min(grid_nrow, len(best_images_dataset.similars))
                 for i, col in enumerate(st.columns(col_nr)):
-                    col_imgs = similars[i::col_nr]
+                    col_imgs = best_images_dataset.similars[i::col_nr]
                     col_imgs_captions_dict = captions_dict[i::col_nr]
                     with col:
                         for j, col_img in enumerate(col_imgs):
