@@ -7,7 +7,7 @@ from PIL import Image
 from common import env_handler
 from common.consts import CATEGORY_DESCR, GRID_NROW_NUMBER, INTERACTIVE_ASSETS_DICT
 from metrics.consts import MetricCollections
-from metrics.core import MetricClient, BestChoiceImagesDataset
+from metrics.core import BestChoiceImagesDataset, MetricClient
 
 
 class ModuleManager:
@@ -61,7 +61,7 @@ class ModuleManager:
             st.session_state.grid_nrow_number = GRID_NROW_NUMBER
 
             # Search Completed State - set after "Find Similar Images" is completed
-            st.session_state.similar_images_found = None
+            # st.session_state.similar_images_found = None
 
     def reset_all_states_button(self) -> None:
         """
@@ -74,7 +74,7 @@ class ModuleManager:
         st.session_state.selected_img = None
         st.session_state.benchmark_similarity_value = None
         st.session_state.similar_img_number = None
-        st.session_state.similar_images_found = None
+        # st.session_state.similar_images_found = None
 
         st.session_state.example_list_pull = None  # NEW
         st.session_state.img_storage_list_pull = None  # NEW
@@ -88,7 +88,7 @@ class ModuleManager:
         st.session_state.selected_img = None
         st.session_state.benchmark_similarity_value = None
         st.session_state.similar_img_number = None
-        st.session_state.similar_images_found = None
+        # st.session_state.similar_images_found = None
 
     def create_title_containers(self) -> None:
         """
@@ -206,6 +206,7 @@ class ModuleManager:
         image examples that a user can select from the list. Additionally, a button for re-running random selection is
         implemented together with the input option for the number of sampled images.
         """
+        st.session_state.img_storage_list_pull = True  # TODO: Upload options other than storage pull temporarily turned off, remove this line when turning on
         if st.session_state.img_storage_list_pull is True:
             self.reset_states_after_image_provisioning_list()
         st.session_state.pull_random_img_number = st.number_input(
@@ -284,6 +285,11 @@ class ModuleManager:
                         format="%i",
                     )
 
+                    logger.info("Similarity Search Button")
+                    button = st.button(
+                        "Find Similar Images", key="similar_images_found"
+                    )
+
     def search_with_show(
         self,
         collection_name: MetricCollections,
@@ -295,12 +301,14 @@ class ModuleManager:
         """
         Shows images in order of their similarity to the original input image.
         """
-        best_images_dataset = BestChoiceImagesDataset.get_best_choice_for_uploaded_image(
-            client=self.metric_client,
-            anchor=file,
-            collection_name=collection_name,
-            k=k,
-            benchmark=benchmark,
+        best_images_dataset = (
+            BestChoiceImagesDataset.get_best_choice_for_uploaded_image(
+                client=self.metric_client,
+                anchor=file,
+                collection_name=collection_name,
+                k=k,
+                benchmark=benchmark,
+            )
         )
         captions_dict = [
             {
@@ -379,42 +387,51 @@ class ModuleManager:
                 "<h3 style='text-align: center;'>How would you like to add an image?</h3>",
                 unsafe_allow_html=True,
             )
-            provisioning_options = [
-                "Example List",
-                "Pull Randomly from the Storage",
-                "File Upload",
-            ]
-            col_image_load_1, col_image_load_2, col_image_load_3 = st.columns(3)
-            with col_image_load_1:
-                st.checkbox(
-                    f"{provisioning_options[0]}", value=False, key="example_list_pull"
-                )
-                self.create_image_provision_for_examples()
-            with col_image_load_2:
-                st.checkbox(
-                    f"{provisioning_options[1]}",
-                    value=False,
-                    key="img_storage_list_pull",
-                )
-                self.create_image_provision_for_random_storage_pull()
-            with col_image_load_3:
-                st.checkbox(
-                    f"{provisioning_options[2]}", value=False, key="file_upload_pull"
-                )
-                self.create_image_provision_for_manual_upload()
 
-            checkbox_state_list = [
-                st.session_state.example_list_pull,
-                st.session_state.img_storage_list_pull,
-                st.session_state.file_upload_pull,
-            ]
-            if sum(checkbox_state_list) > 1:
-                st.write("")
-                st.write("")
-                st.markdown(
-                    "<h4 style='text-align: center; color: red;'>Only one checkbox can be active at a time.</h4>",
-                    unsafe_allow_html=True,
-                )
+            # TODO: Upload options other than storage pull temporarily turned off, uncomment when turning on
+            # provisioning_options = [
+            #     "Example List",
+            #     "Pull Randomly from the Storage",
+            #     "File Upload",
+            # ]
+
+            col_image_load_1, col_image_load_2, col_image_load_3 = st.columns(3)
+
+            # TODO: Upload options other than storage pull temporarily turned off, uncomment when turning on
+            # with col_image_load_1:
+            #     st.checkbox(
+            #         f"{provisioning_options[0]}", value=False, key="example_list_pull"
+            #     )
+            #     self.create_image_provision_for_examples()
+
+            with col_image_load_2:
+                # TODO: Upload options other than storage pull temporarily turned off, uncomment when turning on
+                # st.checkbox(
+                #     f"{provisioning_options[1]}",
+                #     value=False,
+                #     key="img_storage_list_pull",
+                # )
+                self.create_image_provision_for_random_storage_pull()
+
+            # TODO: Upload options other than storage pull temporarily turned off, uncomment when turning on
+            # with col_image_load_3:
+            #     st.checkbox(
+            #         f"{provisioning_options[2]}", value=False, key="file_upload_pull"
+            #     )
+            #     self.create_image_provision_for_manual_upload()
+
+            # checkbox_state_list = [
+            #     st.session_state.example_list_pull,
+            #     st.session_state.img_storage_list_pull,
+            #     st.session_state.file_upload_pull,
+            # ]
+            # if sum(checkbox_state_list) > 1:
+            #     st.write("")
+            #     st.write("")
+            #     st.markdown(
+            #         "<h4 style='text-align: center; color: red;'>Only one checkbox can be active at a time.</h4>",
+            #         unsafe_allow_html=True,
+            #     )
 
     def run_app(self) -> None:
         logger.info("Set main graphical options.")
@@ -438,8 +455,7 @@ class ModuleManager:
             logger.info("Similarity Search Filters")
             self.create_similarity_search_filters()
 
-            logger.info("Similarity Search Button")
-            if st.button("Find Similar Images"):
+            if st.session_state.similar_images_found:
                 self.extract_similar_images()
 
         logger.info("GitHub Fork")

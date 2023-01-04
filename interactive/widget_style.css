@@ -1,7 +1,13 @@
 .stButton > button {
     background: linear-gradient(45deg, #09B3BF 0%, #5FE3C2 100%);
-    max-width: 250px;
+    max-width: 350px;
+    min-width: 100px;
+    min-height: 20px;
     align-items: end;
+    /*font-size: 100px !important;*/
+}
+button > div > p {
+    font-size: 20px !important;
 }
 .element-container:nth-child(0) {
     text-align: center;

@@ -1,9 +1,9 @@
 import json
 import random
+from pathlib import PureWindowsPath
 
 from PIL import Image
 from qdrant_client.grpc import ScoredPoint
-from pathlib import PureWindowsPath
 
 from common.handler_env import EnvFunctionHandler
 from common.utils import singleton

@@ -47,7 +47,8 @@ class CloudFunctionHandler(EnvFunctionHandler):
         Additionally, filenames are returned as future captions in front-end module.
         """
         object_list = [
-            MINIO_MAIN_PATH / PureWindowsPath(r.payload["file"]).as_posix() for r in results
+            MINIO_MAIN_PATH / PureWindowsPath(r.payload["file"]).as_posix()
+            for r in results
         ]
         return [
             Image.open(

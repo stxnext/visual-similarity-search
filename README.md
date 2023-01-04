@@ -371,4 +371,20 @@ Want to talk about [Machine Learning Services](https://www.stxnext.com/services/
 
 
 ## Licenses
-All source code is licensed under the MIT License.
+
+Code:
+* Open-source license.
+
+Data:
+* [Shoes dataset](https://www.kaggle.com/datasets/aryashah2k/large-shoe-dataset-ut-zappos50k) - citations:
+  * A. Yu and K. Grauman. "Fine-Grained Visual Comparisons with Local Learning". In CVPR, 2014.
+  * A. Yu and K. Grauman. "Semantic Jitter: Dense Supervision for Visual Comparisons via Synthetic Images". In ICCV, 2017.
+* [Dogs dataset](https://www.kaggle.com/datasets/jessicali9530/stanford-dogs-dataset) - citations:
+  * Aditya Khosla, Nityananda Jayadevaprakash, Bangpeng Yao and Li Fei-Fei. Novel dataset for Fine-Grained Image Categorization. First Workshop on Fine-Grained Visual Categorization (FGVC), IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2011.
+  * J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li and L. Fei-Fei, ImageNet: A Large-Scale Hierarchical Image Database. IEEE Computer Vision and Pattern Recognition (CVPR), 2009.
+* [Celebrities dataset](https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/) - citations:
+  * Rasmus Rothe and Radu Timofte and Luc Van Gool, Deep expectation of real and apparent age from a single image without facial landmarks, International Journal of Computer Vision, 2018.
+  * Rasmus Rothe and Radu Timofte and Luc Van Gool, Deep EXpectation of apparent age from a single image, IEEE International Conference on Computer Vision Workshops, 2015.
+* [Logos dataset](https://www.kaggle.com/datasets/lyly99/logodet3k) - public.
+
+Let us know if you want your dataset removed.
