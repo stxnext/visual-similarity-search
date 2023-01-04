@@ -1,0 +1,17 @@
+.stButton > button {
+    background: linear-gradient(45deg, #09B3BF 0%, #5FE3C2 100%);
+    max-width: 250px;
+    align-items: end;
+}
+.element-container:nth-child(0) {
+    text-align: center;
+}
+.css-1kyxreq {
+    align-items: center;
+    justify-content: center;
+    background: #00B2A9;
+    min-height: 40px;
+}
+.css-4db2gq {
+    align-items: end;
+}

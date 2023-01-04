@@ -1,7 +1,7 @@
 import json
 import os
 import random
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from minio import Minio
 from PIL import Image
@@ -46,7 +46,9 @@ class CloudFunctionHandler(EnvFunctionHandler):
         Handler for returning images with the highest similarity scores from cloud storage.
         Additionally, filenames are returned as future captions in front-end module.
         """
-        object_list = [MINIO_MAIN_PATH / r.payload["file"].replace('\\', '/') for r in results]
+        object_list = [
+            MINIO_MAIN_PATH / PureWindowsPath(r.payload["file"]).as_posix() for r in results
+        ]
         return [
             Image.open(
                 self.minio_client.get_object(

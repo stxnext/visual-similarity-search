@@ -5,8 +5,8 @@ PROJECT_PATH = Path(__file__).parent.parent
 MINIO_BUCKET_NAME = os.getenv("MINIO_BUCKET_NAME")
 MINIO_MAIN_PATH = Path(os.getenv("MINIO_MAIN_PATH"))
 INTERACTIVE_ASSETS_DICT = {
-    "logo_img_dir": "interactive/assets/stxnext_web_color@1x.png",
-    "app_style_file": PROJECT_PATH / "interactive" / "style.css",
+    "logo_img_dir": "interactive/assets/logo_stx.jpg",
+    "widget_style_file": PROJECT_PATH / "interactive" / "widget_style.css",
     "app_title": "Visual Similarity Search Engine",
     "app_first_paragraph": """
             Returns a set number of images from a selected category. 
@@ -31,6 +31,7 @@ CATEGORY_DESCR = {
             It may be useful for breeders and people looking to buy an animal.
         """,
         "source": "https://www.kaggle.com/datasets/jessicali9530/stanford-dogs-dataset",
+        "bootstrap_icon": "bag",
         "image_examples": [
             {
                 "id": "dog_1",
@@ -53,6 +54,7 @@ CATEGORY_DESCR = {
             It may be useful for users of online shops. 
         """,
         "source": "https://www.kaggle.com/datasets/aryashah2k/large-shoe-dataset-ut-zappos50k",
+        "bootstrap_icon": "bag",
         "image_examples": [
             {
                 "id": "shoes_1",
@@ -74,6 +76,7 @@ CATEGORY_DESCR = {
             It may be useful for marketing purposes.
         """,
         "source": "https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki",
+        "bootstrap_icon": "person-square",
         "image_examples": [
             {
                 "id": "celebrities_1",
@@ -99,6 +102,7 @@ CATEGORY_DESCR = {
             It may be useful when creating a new logo for the company and limiting legal issues when a close match is found.
         """,
         "source": "https://www.kaggle.com/datasets/lyly99/logodet3k",
+        "bootstrap_icon": "images",
         "image_examples": [
             {
                 "id": "logos_1",
