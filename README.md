@@ -226,6 +226,8 @@ All datasets listed below are the property of their respective owners and are us
     * Only pictures available in RGB mode were selected.
   * [Logos dataset](https://www.kaggle.com/datasets/lyly99/logodet3k)
     * The largest logo detection dataset with full annotation, which has 3,000 logo categories, about 200,000 manually annotated logo objects and 158,652 images.
+  * [Waste dataset](https://www.kaggle.com/datasets/mostafaabla/garbage-classification)
+    * A large household waste dataset with 15,150 images from 12 different classes of household garbage; paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, shoes, batteries, and trash.
 
 ### Queued Datasets
 
@@ -386,5 +388,6 @@ Data:
   * Rasmus Rothe and Radu Timofte and Luc Van Gool, Deep expectation of real and apparent age from a single image without facial landmarks, International Journal of Computer Vision, 2018.
   * Rasmus Rothe and Radu Timofte and Luc Van Gool, Deep EXpectation of apparent age from a single image, IEEE International Conference on Computer Vision Workshops, 2015.
 * [Logos dataset](https://www.kaggle.com/datasets/lyly99/logodet3k) - public.
+* [Waste dataset](https://www.kaggle.com/datasets/mostafaabla/garbage-classification) - [license](https://opendatacommons.org/licenses/odbl/1-0/)
 
 Let us know if you want your dataset removed.

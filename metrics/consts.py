@@ -55,6 +55,7 @@ class MetricCollections(Enum):
     SHOES = "shoes"
     CELEBRITIES = "celebrities"
     LOGOS = "logos"
+    WASTE = "waste"
 
 
 METRIC_COLLECTION_NAMES = [x.value for x in iter(MetricCollections)]
