@@ -97,7 +97,27 @@ Installation using the terminal window:
 * Install ***git***, ***docker*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
-* Download `data.zip` file from the [Cloud Storage](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/data.zip) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
+* Download `data.zip` and some data files using following links.
+  * [data.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/data.zip) - template for directory tree with initial Qdrant structure.
+  * [celebrities.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/celebrities.zip) - metadata, models and image repository.
+  * [dogs.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/dogs.zip) - metadata, models and image repository.
+  * [logos.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/logos.zip) - metadata, models and image repository.
+  * [shoes.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/shoes.zip) - metadata, models and image repository.
+  * [waste.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/waste.zip) - metadata, models and image repository.
+* Unpack selected datasets to the cloned repository so that the folder structure from previous section is retained.
+* In the `metrics/consts.py` in the definition of `MetricCollections` class comment dataset names that were not added:
+```python
+class MetricCollections(Enum):
+    """
+    Enum of available collections and pretrained models for similarity.
+    """
+
+    DOGS = "dogs"
+    SHOES = "shoes"
+    CELEBRITIES = "celebrities"
+    LOGOS = "logos"
+    WASTE = "waste"
+```
 * Install Python version 3.10 and ***pip***, ***pipenv*** libraries.
 ```
 sudo apt-get install python3.10 
@@ -146,7 +166,27 @@ Installation using the terminal window:
 * Install ***git***, ***docker***, ***docker-compose*** and ***make*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
-* Download `data.zip` file from the [Cloud Storage](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/data.zip) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
+* Download `data.zip` and some data files using following links.
+  * [data.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/data.zip) - template for directory tree with initial Qdrant structure.
+  * [celebrities.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/celebrities.zip) - metadata, models and image repository.
+  * [dogs.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/dogs.zip) - metadata, models and image repository.
+  * [logos.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/logos.zip) - metadata, models and image repository.
+  * [shoes.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/shoes.zip) - metadata, models and image repository.
+  * [waste.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/waste.zip) - metadata, models and image repository.
+* Unpack selected datasets to the cloned repository so that the folder structure from previous section is retained. 
+* In the `metrics/consts.py` in the definition of `MetricCollections` class comment dataset names that were not added:
+```python
+class MetricCollections(Enum):
+    """
+    Enum of available collections and pretrained models for similarity.
+    """
+
+    DOGS = "dogs"
+    SHOES = "shoes"
+    CELEBRITIES = "celebrities"
+    LOGOS = "logos"
+    WASTE = "waste"
+```
 * To set up a dockerized application, execute one of the options below in the terminal window.
 ``` 
 # Use Makefile:
