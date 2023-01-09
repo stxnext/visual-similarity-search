@@ -321,6 +321,7 @@ Currently available boards:
 * [Shoes](https://tensorboard.dev/experiment/DhrhyBFaSJiGwEfP9KoGDA/#scalars)
 * [Celebrities](https://tensorboard.dev/experiment/TDgjYNDUQ32DoKYEZoIoow/#scalars)
 * [Logos](https://tensorboard.dev/experiment/1r2BsdkER3yRBdqBjF5y9A/#scalars)
+* [Waste](https://tensorboard.dev/experiment/414gt1LPSeqpAEAU1yWeIg/#scalars)
 
 
 ### Qdrant Database Update
