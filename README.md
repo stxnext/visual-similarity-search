@@ -97,7 +97,27 @@ Installation using the terminal window:
 * Install ***git***, ***docker*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
-* Download `data.zip` file from the [Cloud Storage](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/data.zip) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
+* Download `data.zip` and some data files using following links.
+  * [data.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/data.zip) - template for directory tree with initial Qdrant structure.
+  * [celebrities.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/celebrities.zip) - metadata, models and image repository.
+  * [dogs.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/dogs.zip) - metadata, models and image repository.
+  * [logos.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/logos.zip) - metadata, models and image repository.
+  * [shoes.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/shoes.zip) - metadata, models and image repository.
+  * [waste.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/waste.zip) - metadata, models and image repository.
+* Unpack selected datasets to the cloned repository so that the folder structure from previous section is retained.
+* In the `metrics/consts.py` in the definition of `MetricCollections` class comment dataset names that were not added:
+```python
+class MetricCollections(Enum):
+    """
+    Enum of available collections and pretrained models for similarity.
+    """
+
+    DOGS = "dogs"
+    SHOES = "shoes"
+    CELEBRITIES = "celebrities"
+    LOGOS = "logos"
+    WASTE = "waste"
+```
 * Install Python version 3.10 and ***pip***, ***pipenv*** libraries.
 ```
 sudo apt-get install python3.10 
@@ -146,7 +166,27 @@ Installation using the terminal window:
 * Install ***git***, ***docker***, ***docker-compose*** and ***make*** packages.
 * `cd` to your target directory.
 * Clone [repository](https://github.com/stxnext/visual-similarity-search) (preferably use SSH cloning).
-* Download `data.zip` file from the [Cloud Storage](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/data.zip) and unpack it to the repository so that the folder structure above is retained. `data` folder contains Qdrant database snapshot, deep learning models and image repositories.
+* Download `data.zip` and some data files using following links.
+  * [data.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/data.zip) - template for directory tree with initial Qdrant structure.
+  * [celebrities.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/celebrities.zip) - metadata, models and image repository.
+  * [dogs.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/dogs.zip) - metadata, models and image repository.
+  * [logos.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/logos.zip) - metadata, models and image repository.
+  * [shoes.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/shoes.zip) - metadata, models and image repository.
+  * [waste.zip](https://storage.googleapis.com/stx-ml-public/Visual-Similarity-Search/Data/waste.zip) - metadata, models and image repository.
+* Unpack selected datasets to the cloned repository so that the folder structure from previous section is retained. 
+* In the `metrics/consts.py` in the definition of `MetricCollections` class comment dataset names that were not added:
+```python
+class MetricCollections(Enum):
+    """
+    Enum of available collections and pretrained models for similarity.
+    """
+
+    DOGS = "dogs"
+    SHOES = "shoes"
+    CELEBRITIES = "celebrities"
+    LOGOS = "logos"
+    WASTE = "waste"
+```
 * To set up a dockerized application, execute one of the options below in the terminal window.
 ``` 
 # Use Makefile:
@@ -226,6 +266,8 @@ All datasets listed below are the property of their respective owners and are us
     * Only pictures available in RGB mode were selected.
   * [Logos dataset](https://www.kaggle.com/datasets/lyly99/logodet3k)
     * The largest logo detection dataset with full annotation, which has 3,000 logo categories, about 200,000 manually annotated logo objects and 158,652 images.
+  * [Waste dataset](https://www.kaggle.com/datasets/mostafaabla/garbage-classification)
+    * A large household waste dataset with 15,150 images from 12 different classes of household garbage; paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, shoes, batteries, and trash.
 
 ### Queued Datasets
 
@@ -319,6 +361,7 @@ Currently available boards:
 * [Shoes](https://tensorboard.dev/experiment/DhrhyBFaSJiGwEfP9KoGDA/#scalars)
 * [Celebrities](https://tensorboard.dev/experiment/TDgjYNDUQ32DoKYEZoIoow/#scalars)
 * [Logos](https://tensorboard.dev/experiment/1r2BsdkER3yRBdqBjF5y9A/#scalars)
+* [Waste](https://tensorboard.dev/experiment/414gt1LPSeqpAEAU1yWeIg/#scalars)
 
 
 ### Qdrant Database Update
@@ -386,5 +429,6 @@ Data:
   * Rasmus Rothe and Radu Timofte and Luc Van Gool, Deep expectation of real and apparent age from a single image without facial landmarks, International Journal of Computer Vision, 2018.
   * Rasmus Rothe and Radu Timofte and Luc Van Gool, Deep EXpectation of apparent age from a single image, IEEE International Conference on Computer Vision Workshops, 2015.
 * [Logos dataset](https://www.kaggle.com/datasets/lyly99/logodet3k) - public.
+* [Waste dataset](https://www.kaggle.com/datasets/mostafaabla/garbage-classification) - [license](https://opendatacommons.org/licenses/odbl/1-0/)
 
 Let us know if you want your dataset removed.

@@ -116,4 +116,27 @@ CATEGORY_DESCR = {
             },
         ],
     },
+    "waste": {
+        "description": "Waste - 12 categories of household garbage.",
+        "business_usage": """
+            **USE CASE #1**: Identifying general category of recyclable waste for the purpose of sorting. 
+            It may be useful in machines that automatically split mixed garbage to its recyclable and organic components.
+            **USE CASE #2**: Identifying a type of recyclable waste for the purpose of household sorting. 
+            It may be useful when a target category of waste is difficult to identify.
+        """,
+        "source": "https://www.kaggle.com/datasets/mostafaabla/garbage-classification",
+        "bootstrap_icon": "trash",
+        "image_examples": [
+            {
+                "id": "waste_1",
+                "path": EXAMPLE_PATH / "waste_img_1.jpg",
+                "label": "Cardboard",
+            },
+            {
+                "id": "waste_2",
+                "path": EXAMPLE_PATH / "waste_img_2.png",
+                "label": "Glass",
+            },
+        ],
+    },
 }
